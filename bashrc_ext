@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+DOTFILES_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+# If the directory exists, add it to $PATH
+function pathAdd() {
+    if [ -d "$1" ]; then
+        export PATH="$1:$PATH"
+    fi
+}
+
+# Sources the provided file if it exists
+function sourceFile() {
+    if [ -f "$1" ]; then
+        . "$1"
+    fi
+}
+
+#####
+# ENV extenstions
+#####
+sourceFile "$HOME/.cargo/env" # rust
+sourceFile "$HOME/v/bin/activate" # python venv
+sourceFile "$HOME/.ghcup/env" # haskell
+sourceFile "$DOTFILES_DIR/env_ext" # env variables set during install
+
+#####
+# PATH extensions
+#####
+pathAdd "$HOME/bin"
+pathAdd "$HOME/.local/bin"
+pathAdd "$HOME/.elan/bin" # Lean 4
+pathAdd "$HOME/.local/share/JetBrains/Toolbox/scripts" # Jetbrain Toolbox
+
+#####
+# Aliases
+#####
+if command -v lsd >/dev/null 2>&1; then
+    # lsd exists, so we're using it
+    alias ls=lsd
+fi
+
+#####
+# EMACS ++ vterm
+#####
+vterm_printf() {
+    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ]); then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
+
+
+if [[ "$INSIDE_EMACS" = 'vterm' ]]; then
+    function clear() {
+        vterm_printf "51;Evterm-clear-scrollback";
+        tput clear;
+    }
+fi
+
+#####
+# MISC
+#####
+# direnv
+if command -v direnv >/dev/null 2>&1; then
+    eval "$(direnv hook bash)"
+else
+    echo "[WARNING] Direnv not installed"
+fi
+
+# starship
+if command -v >/dev/null 2>&1; then
+    # setup starship
+    eval "$(starship init bash)"
+fi
