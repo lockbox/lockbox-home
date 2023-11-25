@@ -11,7 +11,7 @@
 
 # Make "$HOME/.config/i3" if it does not
 # exist
-I3_CFG_DIR="$HOME/.config/I3"
+I3_CFG_DIR="$HOME/.config/i3"
 if [ ! -d "$I3_CFG_DIR" ]; then
     mkdir -p "$I3_CFG_DIR"
 fi

@@ -1,0 +1,68 @@
+[theme]
+theme = "srcery"
+[icons]
+icons = "none"
+
+[[block]]
+block = "music"
+format = " $icon {$combo.str(max_w:20,rot_interval:0.5) $play $next |}"
+interface_name_exclude = [".*kdeconnect.*", "mpd"]
+[[block.click]]
+button = "left"
+action = "play_pause"
+[[block.click]]
+button = "up"
+action = "volume_up"
+[[block.click]]
+button = "down"
+action = "volume_down"
+[[block.click]]
+button = "forward"
+action = "next"
+[[block.click]]
+button = "back"
+action = "prev"
+
+[[block]]
+block = "net"
+device = "locknet"
+format = " $icon $ip via $device @ $speed_up/$speed_down (U/D) B/s"
+
+[[block]]
+block = "cpu"
+
+[[block]]
+block = "disk_space"
+path = "/"
+info_type = "available"
+alert_unit = "GB"
+interval = 20
+warning = 20.0
+alert = 10.0
+format = " $icon /: $available.eng(w:2) "
+
+[[block]]
+block = "memory"
+format = " $icon $mem_total_used_percents.eng(w:2) "
+format_alt = " $icon_swap $swap_used_percents.eng(w:2) "
+
+[[block]]
+block = "amd_gpu"
+format = " $icon $utilization "
+format_alt = " $icon MEM: $vram_used_percents ($vram_used/$vram_total) "
+interval = 1
+
+[[block]]
+block = "net"
+format = " {$signal_strength $ssid|Wired connection} via $device $graph_down"
+
+[[block]]
+block = "sound"
+[[block.click]]
+button = "left"
+cmd = "pavucontrol"
+
+[[block]]
+block = "time"
+interval = 5
+format = " $timestamp.datetime(f:'%a %d/%m %R') "
