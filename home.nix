@@ -78,9 +78,10 @@
   # manage bash
   programs.bash = {
     enable = true;
-    #bashrcExtra = ''
-    #  . ~/.dotfiles/bashrc_ext
-    #'';
+    # for now drop into the venv
+    bashrcExtra = ''
+      . ~/v/bin/activate
+    '';
   };
 
 
