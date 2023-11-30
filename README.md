@@ -1,56 +1,32 @@
-# dotfiles
+# home-manager
 
-## Assumptions
-- linux
-- virtualenv at `$HOME/v` (python 3.8+)
-- bash
+This assumes that `nix` is installed.
 
-## Configs / Additions
+on first install run
 
-Things it will attempt to source:
-- ghcup env
-- cargo env
-- python venv (@ `$HOME/v`)
-
-Things it will attempt to add to path:
-- local bin
-- lean bin
-- jetbrains toolbox
-
-Things it will attempt to alias:
-- ls -> lsd
-
-Misc:
-- emacs vterm support hooks
-- direnv hooks
-- starship hooks
-
-Config symlinks installed:
-- zellij
-- starship
-- i3
-- wezterm
-
-TODO
-- nix home-manager
-
-
-### More
-
-Additional default working set of command line tools (not really having to do w dotfiles):
-- bat
-- ripgrep
-- find
-- dust
-- btm (bottom)
-- lsd
-- zellij
-
-installed via
-
+TLDR;
 ```bash
-$ cargo install --force --locked bat ripgrep fd-find du-dust bottom lsd zellij
+$ git clone git@github.com:lockbox/dot.git ~/.config/home-manager
+$ ./.config/home-manager/install.sh
+# should setup everything
 ```
 
-## Things not handled
-- vscode (settings sync)
+OR (assuming `nix` is already installed)
+
+```bash
+$ git clone git@github.com:lockbox/dot.git ~/.config/home-manager
+$ nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+$ nix-channel --update
+$ nix-shell '<home-manager>' -A install
+$ home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes
+```
+
+then afterwards just run
+
+```bash
+$ home-manager switch
+```
+
+like normal.
+
+i copied a lot of this from <https://github.com/tars0x9752/home>

@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-#
-# On running `./install.sh`, this will be populated with
-# an extra env vars from the `config` process
-export STARSHIP_CONFIG=/home/lockbox/.dotfiles/configs/starship/config.toml
