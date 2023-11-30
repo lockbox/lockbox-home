@@ -78,9 +78,9 @@
   # manage bash
   programs.bash = {
     enable = true;
-    bashrcExtra = ''
-      . ~/.dotfiles/bashrc_ext
-    '';
+    #bashrcExtra = ''
+    #  . ~/.dotfiles/bashrc_ext
+    #'';
   };
 
 
