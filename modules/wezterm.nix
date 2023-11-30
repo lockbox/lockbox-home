@@ -1,8 +1,10 @@
 { pkgs, ... }:
 {
-    home.packages = with pkgs; [
-        wezterm
-    ];
+    # need to manually install wezterm unless want to
+    # engage in jank nixGL hax
+    #home.packages = with pkgs; [
+    #    wezterm
+    #];
 
     xdg.configFile."wezterm/wezterm.lua".text = ''
         local wezterm = require 'wezterm'
