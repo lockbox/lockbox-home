@@ -34,12 +34,12 @@ block = "cpu"
 [[block]]
 block = "disk_space"
 path = "/"
-info_type = "available"
+info_type = "used"
 alert_unit = "GB"
 interval = 20
-warning = 20.0
-alert = 10.0
-format = " $icon /: $available.eng(w:2) "
+warning = 1024.0
+alert = 1536.0
+format = " $icon: $percentage"
 
 [[block]]
 block = "memory"
