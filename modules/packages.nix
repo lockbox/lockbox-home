@@ -13,23 +13,9 @@
         broot
         jq
         nmap
-        unzip
-        protobuf
-        coreutils
-        binutils
         pciutils
-        gawk
-        gnumake
-        gnused
         jo
-        jq
-        curl
-        wget
-        xsel
-        xclip
-        xdotool
-        copyq
-        gettext
+        tokei
 
         # nix
         rnix-lsp
