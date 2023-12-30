@@ -29,4 +29,11 @@ $ home-manager switch
 
 like normal.
 
-i copied a lot of this from <https://github.com/tars0x9752/home>
+## Updating
+
+```bash
+$ cd ~/.config/home-manager && nix flake update && home-manager switch
+```
+
+## creds
+i copied a lot of this from <https://github.com/tars0x9752/home> when starting out
