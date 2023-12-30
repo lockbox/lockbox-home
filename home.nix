@@ -81,6 +81,9 @@
     # for now drop into the venv
     bashrcExtra = ''
       . ~/v/bin/activate
+      if [ -f ~/.ghcup/env ]; then
+        . ~/.ghcup/env
+      fi
     '';
   };
 
