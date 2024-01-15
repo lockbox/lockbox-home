@@ -80,10 +80,13 @@
     enable = true;
     # for now drop into the venv
     bashrcExtra = ''
-      . ~/v/bin/activate
+      if [ -f ~/v/bin/activate ]; then
+        . ~/v/bin/activate
+      fi
       if [ -f ~/.ghcup/env ]; then
         . ~/.ghcup/env
       fi
+      alias ls=lsd
     '';
   };
 
