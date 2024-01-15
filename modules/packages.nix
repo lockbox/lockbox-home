@@ -3,8 +3,8 @@
     home.packages = with pkgs; [
         # misc
         ranger
-
-        # utils - slowly adding all of them
+        bottom
+        trippy
         bat
         du-dust
         fd
