@@ -10,5 +10,9 @@
         ./rust.nix
         ./zellij
         ./i3
+        ./polybar
+        ./picom
+        ./dunst
+        ./rofi
     ];
 }

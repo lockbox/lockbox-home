@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# killall -q polybar
+polybar-msg cmd quit
+
+# launch with config
+#polybar main-polybar 2>&1 | tee -a /tmp/polybar.log > /dev/null & disown
+
+# route all contents to logs for all polybars
+polybar_id=0
+for m in $(polybar --list-monitors | cut -d":" -f1); do
+    MONITOR=$m polybar --reload main-polybar 2>1 | tee -a "/tmp/polybar-$polybar_id.log" > /dev/null & disown
+    (( polybar_id++ ))
+done
+
+echo "Polybar spawned"
+
