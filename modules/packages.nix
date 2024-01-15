@@ -17,6 +17,10 @@
         jo
         tokei
 
+        # extra
+        magic-wormhole
+        awscli
+
         # nix
         rnix-lsp
         nixpkgs-fmt
