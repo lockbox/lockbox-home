@@ -8,7 +8,7 @@
   # manage.
   home.username = "lockbox";
   home.homeDirectory = "/home/lockbox";
-  
+
   # enable flakes and new command
   nix = {
     package = pkgs.nix;

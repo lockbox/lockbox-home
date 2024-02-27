@@ -16,6 +16,8 @@
         pciutils
         jo
         tokei
+        btop
+        just
 
         # extra
         magic-wormhole

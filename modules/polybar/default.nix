@@ -1,4 +1,4 @@
 { ... }:
 {
-    xdg.configFile."polybar/config".source = ./config.ini;
+    xdg.configFile."polybar/config.ini".source = ./config.ini;
 }
