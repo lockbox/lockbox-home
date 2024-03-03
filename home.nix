@@ -87,6 +87,16 @@
         . ~/.ghcup/env
       fi
       alias ls=lsd
+
+      # if on gentoo box, add etckeeper hooks
+      if [[ "$HOSTNAME" = "codeine" ]]; then
+
+        # From /usr/share/doc/etckeeper*/bashrc.example
+        case "$EBUILD_PHASE" in
+          setup|prerm) etckeeper pre-install ;;
+          postinst|postrm) etckeeper post-install ;;
+        esac
+      fi
     '';
   };
 
