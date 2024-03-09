@@ -18,6 +18,7 @@
         tokei
         btop
         just
+        kmon
 
         # extra
         magic-wormhole
@@ -25,6 +26,7 @@
 
         # nix
         rnix-lsp
+        nil
         nixpkgs-fmt
         nix-prefetch-git
         nix-prefetch-github

@@ -24,6 +24,8 @@ set $mod Mod4
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
 
+# dunst for notifications
+exec --no-startup-id dunst
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
 
@@ -59,9 +61,9 @@ bindsym $mod+Shift+q kill
 bindsym $mod+Shift+Control+l exec loginctl lock-session
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec --no-startup-id dmenu_run
+#bindsym $mod+d exec --no-startup-id dmenu_run
 # A more modern dmenu replacement is rofi:
-# bindcode $mod+40 exec "rofi -modi drun,run -show drun"
+bindsym $mod+d exec "rofi -modi drun -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
@@ -212,5 +214,3 @@ exec-always --no-startup-id ~/.config/home-manager/modules/polybar/launch
 # picom
 exec --no-startup-id picom
 
-# dunst for notifications
-exec --no-startup-id dunst
