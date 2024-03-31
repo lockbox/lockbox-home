@@ -1,6 +1,8 @@
 { pkgs, ...}:
 {
     home.packages = with pkgs; [
+        rustup
+        
         # misc
         ranger
         bottom
@@ -25,6 +27,8 @@
         awscli
 
         # nix
+        colmena
+        nix-output-monitor
         rnix-lsp
         nil
         nixpkgs-fmt
