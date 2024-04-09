@@ -87,6 +87,7 @@
         . ~/.ghcup/env
       fi
       alias ls=lsd
+      alias docker-compose="docker compose"
 
       # if on gentoo box, add etckeeper hooks
       if [[ "$HOSTNAME" = "codeine" ]]; then
