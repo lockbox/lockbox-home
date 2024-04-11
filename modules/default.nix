@@ -14,5 +14,6 @@
         ./picom
         ./dunst
         ./rofi
+        ./auth.nix
     ];
 }
