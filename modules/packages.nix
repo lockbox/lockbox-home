@@ -29,7 +29,6 @@
         # nix
         colmena
         nix-output-monitor
-        rnix-lsp
         nil
         nixpkgs-fmt
         nix-prefetch-git
