@@ -9,6 +9,19 @@
     # https://github.com/nix-community/home-manager/blob/a561ad6ab38578c812cc9af3b04f2cc60ebf48c9/modules/programs/ssh.nix#L471
   };
 
+  services.ssh-agent.enable = true;
+
+  services.gpg-agent = {
+    enable = true;
+
+    pinentryPackage = pkgs.pinentry-curses;
+
+    extraConfig = ''
+      allow-emacs-pinentry
+      allow-loopback-pinentry
+    '';
+  };
+
   # gpg
   programs.gpg = {
     enable = true;
@@ -49,7 +62,7 @@
       # when making an OpenPGP certification, use a stronger digest than the deafult SHA1
       cert-digest-algo = "SHA512";
       s2k-cipher-algo = "AES256";
-      s2kdigest-algo = "SHA512";
+      s2k-digest-algo = "SHA512";
 
       # defualt to keys.openpgp.org as keyserver
       keyserver = "keys.openpgp.org";
