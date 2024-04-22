@@ -19,6 +19,7 @@
         jo
         tokei
         btop
+        htop
         just
         kmon
 
