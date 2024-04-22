@@ -3,10 +3,17 @@
   # ssh
   programs.ssh = {
     enable = true;
-    addKeysToAgent = "confirm";
-    # TODO:
-    # matchBlocks = {};
-    # https://github.com/nix-community/home-manager/blob/a561ad6ab38578c812cc9af3b04f2cc60ebf48c9/modules/programs/ssh.nix#L471
+    addKeysToAgent = "confirm 30m";
+    hashKnownHosts = true;
+    compression = true;
+
+    matchBlocks = {
+      "github.com" = {
+        hostname = "github.com";
+        user = "lockbox";
+        identityFile = "~/.ssh/id_devkey";
+      };
+    };
   };
 
   services.ssh-agent.enable = true;
