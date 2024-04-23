@@ -9,7 +9,17 @@
     userEmail = "lockbox@struct.foo";
 
     # ignore some editor common + direnv things
-    ignores = [ "*~" "*.swp" ".direnv" "__pycache__" "build" "target" ];
+    ignores = [ "*~" "*.swp" ] 
+    # direnv
+    ++ [ ".direnv" ]
+    # python garbage
+    ++ [ "__pycache__" ]
+    # build dir's
+    ++ [ "build" "target" ]
+    # built objects
+    ++ [ "*.so" ".o" ".ko"]
+    # custom stuff
+    ++ [ ".lockbox" ];
 
     # setup signing defaults
     signing = {
