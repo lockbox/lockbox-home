@@ -98,6 +98,9 @@
           postinst|postrm) etckeeper post-install ;;
         esac
       fi
+
+      # add zoxide hooks
+      eval "$(zoxide init bash)"
     '';
   };
 
