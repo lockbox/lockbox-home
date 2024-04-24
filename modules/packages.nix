@@ -22,6 +22,8 @@
         htop
         just
         kmon
+        fzf
+        zoxide
 
         # extra
         magic-wormhole
