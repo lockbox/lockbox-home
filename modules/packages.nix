@@ -1,9 +1,14 @@
 { pkgs, ...}:
 {
     home.packages = with pkgs; [
+        # emacs
+        nodejs_21
+        texlive.combined.scheme-medium
+        sqlite
+
         rustup
         
-        # misc
+        # shell utils
         ranger
         bottom
         trippy
