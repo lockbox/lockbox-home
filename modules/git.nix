@@ -18,6 +18,8 @@
     ++ [ "build" "target" ]
     # built objects
     ++ [ "*.so" ".o" ".ko"]
+    # things that should be "opt in commit" only
+    ++ [ ".dir-locals.el" ".local-env" ".envrc" ]
     # custom stuff
     ++ [ ".lockbox" ];
 
