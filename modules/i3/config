@@ -3,6 +3,7 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 set $mod Mod4
+set $alt Mod1
 
 # NOTE: font is set at the bottom of this config
 #
@@ -57,7 +58,7 @@ bindsym $mod+Shift+Control+l exec loginctl lock-session
 #bindsym $mod+d exec --no-startup-id dmenu_run
 # A more modern dmenu replacement is rofi:
 bindsym $mod+d exec "rofi -show drun -modes drun,run,window,filebrowser"
-bindsym $mod+space exec "rofi -show drun -modes drun,run,window,filebrowser"
+bindsym $alt+space exec "rofi -show drun -modes drun,run,window,filebrowser"
 # There also is i3-dmenu-desktop which only displays applications shipping a
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
