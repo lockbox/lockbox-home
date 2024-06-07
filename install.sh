@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo
 
 # make sure nix is installed
 if command -v nix >/dev/null 2>&1; then
