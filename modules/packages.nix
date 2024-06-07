@@ -2,7 +2,7 @@
 {
     home.packages = with pkgs; [
         # emacs
-        nodejs_21
+        nodejs
         texlive.combined.scheme-medium
         sqlite
 
@@ -12,6 +12,7 @@
         ranger
         bottom
         trippy
+        taplo-cli
         bat
         du-dust
         fd
