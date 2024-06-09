@@ -3,6 +3,7 @@
     home.packages = with pkgs; [
         # emacs
         nodejs
+        nodePackages_latest.pnpm
         texlive.combined.scheme-medium
         sqlite
 
