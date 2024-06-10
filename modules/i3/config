@@ -197,7 +197,8 @@ exec --no-startup-id picom -b
 default_border pixel 1
 
 # set wallpaper
-exec --no-startup-id feh --bg-scale --zoom fill ~/Pictures/wallpaper.png
+exec-always --no-startup-id feh --bg-scale --zoom fill ~/Pictures/wallpaper.png
 
 # startup sound server
 exec-always gentoo-pipewire-launcher &
+
