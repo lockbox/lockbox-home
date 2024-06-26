@@ -200,5 +200,5 @@ default_border pixel 1
 exec-always --no-startup-id feh --bg-scale --zoom fill ~/Pictures/wallpaper.png
 
 # startup sound server
-exec-always gentoo-pipewire-launcher &
+#exec-always gentoo-pipewire-launcher &
 

@@ -1,6 +1,9 @@
 { pkgs, ...}:
 {
     home.packages = with pkgs; [
+        minikube
+        terraform
+        kubectl
         # emacs
         nodejs
         nodePackages_latest.pnpm
