@@ -4,6 +4,8 @@
         minikube
         terraform
         kubectl
+        azure-cli
+        k9s
         # emacs
         nodejs
         nodePackages_latest.pnpm
@@ -34,10 +36,12 @@
         kmon
         fzf
         zoxide
+        i3status-rust
+        i3status
 
         # extra
         magic-wormhole
-        awscli
+        awscli2
 
         # nix
         colmena

@@ -86,6 +86,9 @@
       if [ -f ~/.ghcup/env ]; then
         . ~/.ghcup/env
       fi
+      if [ -f ~/.rye/env ]; then
+        . ~/.rye/env
+      fi
       alias ls=lsd
       alias docker-compose="docker compose"
 
@@ -99,8 +102,16 @@
         esac
       fi
 
+      # add guix to env
+      if [ -d "$HOME/.config/guix" ]; then
+        GUIX_PROFILE="$HOME/.config/guix/current"
+        . "$GUIX_PROFILE/etc/profile"
+      fi
+
       # add zoxide hooks
-      eval "$(zoxide init bash)"
+      if command -v zoxide &> /dev/null; then
+        eval "$(zoxide init bash)"
+      fi
     '';
   };
 

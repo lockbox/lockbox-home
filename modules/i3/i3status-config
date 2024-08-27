@@ -1,0 +1,86 @@
+general {
+        output_format = "i3bar"
+        colors = true
+        interval = 5
+}
+
+order += "disk /"
+order += "wireless wlp5s0"
+order += "ethernet _first_"
+#order += "cpu_temperature 0"
+order += "memory"
+order += "load"
+order += "volume master"
+order += "battery 0"
+order += "time"
+
+volume master {
+        format = "♪: %volume"
+        format_muted = "♪: muted (%volume)"
+        device = "pulse:alsa_output.pci-0000_07_00.6.analog-stereo"
+}
+
+wireless wlp5s0 {
+        format_up = "W(%essid): %ip"
+        format_down = "W: down"
+}
+
+ethernet _first_ {
+        format_up = "E: %ip (%speed)"
+        format_down = "E: down"
+}
+
+battery 0 {
+        format = "%status %percentage %remaining %emptytime"
+        format_down = "No battery"
+        status_chr = "⚡ CHR"
+        status_bat = "🔋 BAT"
+        status_unk = "? UNK"
+        status_full = "☻ FULL"
+        path = "/sys/class/power_supply/BAT%d/uevent"
+        low_threshold = 10
+}
+
+run_watch DHCP {
+        pidfile = "/var/run/dhclient*.pid"
+}
+
+run_watch VPNC {
+        # file containing the PID of a vpnc process
+        pidfile = "/var/run/vpnc/pid"
+}
+
+path_exists VPN {
+        # path exists when a VPN tunnel launched by nmcli/nm-applet is active
+        path = "/proc/sys/net/ipv4/conf/tun0"
+}
+
+time {
+        format = "%a %b-%d %H:%M"
+}
+
+load {
+        format = "Load: %1min"
+}
+
+# TODO: add temp
+# https://github.com/i3/i3status/blob/main/contrib/wrapper.py
+cpu_temperature 0 {
+        format = "T: %degrees °C"
+        path = "/sys/class/thermal/thermal_zone%d/temp"
+        max_threshold = 90
+}
+
+memory {
+        format = "RAM: %percentage_used"
+        threshold_degraded = "10%"
+        format_degraded = "RAM: %percentage_used"
+}
+
+disk "/" {
+        format = "%free free"
+}
+
+read_file uptime {
+        path = "/proc/uptime"
+}
