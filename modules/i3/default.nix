@@ -6,4 +6,5 @@
     # https://nixos.wiki/wiki/I3
     # https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/applications/window-managers/i3/status-rust.nix
     xdg.configFile."i3/config".source = ./config;
+    xdg.configFile."i3status/config".source = ./i3status-config;
 }
