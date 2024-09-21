@@ -10,8 +10,8 @@ else
 fi
 
 nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz
+#nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz
 nix-channel --update
-nix-env -iA nixgl.auto.nixGLDefault
+#nix-env -iA nixgl.auto.nixGLDefault
 nix-shell '<home-manager>' -A install
 home-manager switch --extra-experimental-features nix-command --extra-experimental-features flakes
