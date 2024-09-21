@@ -6,6 +6,7 @@
         kubectl
         azure-cli
         k9s
+        bazelisk
         # emacs
         nodejs
         nodePackages_latest.pnpm
@@ -50,6 +51,6 @@
         nixpkgs-fmt
         nix-prefetch-git
         nix-prefetch-github
-        nix-du
+        #nix-du
     ];
 }

@@ -70,6 +70,7 @@
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
     # EDITOR = "emacs";
+    GIT_SSH = "/usr/bin/ssh";
   };
 
   # Let Home Manager install and manage itself.
@@ -112,6 +113,10 @@
       if command -v zoxide &> /dev/null; then
         eval "$(zoxide init bash)"
       fi
+      if [ -f $HOME/.grit/bin/env ]; then
+        . $HOME/.grit/bin/env
+      fi
+      export GIT_SSH="/usr/bin/ssh"
     '';
   };
 
