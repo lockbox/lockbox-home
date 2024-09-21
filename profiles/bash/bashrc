@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# -*- bash -*-
+# Local Variables:
+# mode: shell-script
+# sh-shell: bash
+# End:
+
+# This file is sourced by all *interactive* bash shells on startup,
+# including some apparently interactive shells such as scp and rcp
+# that can't tolerate any output.  So make sure this doesn't display
+# anything or bad things will happen !
+
+
+# Test for an interactive shell.  There is no need to set anything
+# past this point for scp and rcp, and it's important to refrain from
+# outputting anything in those cases.
+if [[ $- != *i* ]] ; then
+	# Shell is non-interactive.  Be done now!
+	return
+fi
+
+source ~/.profile
+
+# add guix to env
+if [ -d "$HOME/.guix-profile" ]; then
+  GUIX_PROFILE="$HOME/.guix-profile"
+  source "$GUIX_PROFILE/etc/profile"
+fi
+if [ -d "$HOME/.config/guix" ]; then
+  GUIX_PROFILE="$HOME/.config/guix/current"
+  . "$GUIX_PROFILE/etc/profile"
+fi
+
+
+
+function src_exists() {
+    local fpath="$1"
+    if [ -f $fpath ]; then
+        source $fpath
+    fi
+}
+
+# Put your fun stuff here.
+src_exists "~/v/bin/activate"
+src_exists "~/.ghcup/env"
+src_exists "~/.rye/env"
+src_exists "~/.cargo/env"
+src_exists "/.grit/bin/env"
+
+# add .local/bin to path
+export PATH="$HOME/.local/bin:$PATH"
+
+# if on gentoo box, add etckeeper hooks
+if [[ "$HOSTNAME" = "codeine" ]]; then
+
+  # From /usr/share/doc/etckeeper*/bashrc.example
+  case "$EBUILD_PHASE" in
+    setup|prerm) etckeeper pre-install ;;
+    postinst|postrm) etckeeper post-install ;;
+  esac
+fi
+
+# add shell hooks
+if command -v zoxide &> /dev/null; then
+  eval "$(zoxide init bash)"
+fi
+if command -v direnv &> /dev/null; then
+  eval "$(direnv hook bash)"
+fi
+
+HISTFILESIZE=100000
+HISTSIZE=10000
+
+shopt -s histappend
+shopt -s checkwinsize
+shopt -s extglob
+shopt -s globstar
+shopt -s checkjobs

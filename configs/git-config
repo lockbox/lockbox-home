@@ -1,0 +1,41 @@
+# This is Git's per-user configuration file.
+[user]
+	name = Jordan Moore
+	email = lockbox@struct.foo
+	signingKey = 0x645361BCAC65B82C
+
+[alias]
+	astash = "stash --all"
+	fpush = "push --force-if-includes"
+
+[column]
+	ui = "auto"
+
+[commit]
+	gpgSign = true
+
+[tag]
+	gpgSign = true
+
+[filter "lfs"]
+	clean = "git-lfs clean -- %f"
+	process = "git-lfs filter-process"
+	required = true
+	smudge  = "git-lfs smudge -- %f"
+
+[init]
+	defaultBranch = "main"
+
+[rebase]
+	ff = "only"
+	updateRefs = true
+
+[rerere]
+	enabled = true
+
+[receive]
+	autogc = true
+
+[include]
+	path = "~/.config/lockbox-home/configs/git-email"
+
