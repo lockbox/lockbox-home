@@ -1,0 +1,15 @@
+
+*~
+*.swp
+.direnv
+__pycache__
+*.pyc
+build
+target
+*.so
+*.o
+*.ko
+# opt-in to adding dir-locals
+.dir-locals.el
+.local-env
+.local-lockbox

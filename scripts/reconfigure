@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#
+# reconfigure guix home
+
+guix home reconfigure ~/.config/lockbox-home/home-configuration.scm
