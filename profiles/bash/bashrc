@@ -31,8 +31,7 @@ if [ -d "$HOME/.config/guix" ]; then
   . "$GUIX_PROFILE/etc/profile"
 fi
 
-
-
+# source the file if the provided FILE exists
 function src_exists() {
     local fpath="$1"
     if [ -f $fpath ]; then
@@ -40,15 +39,35 @@ function src_exists() {
     fi
 }
 
+# prepend to PATH if the provided DIR exists
+function ppath_exists() {
+    local path_dir="$1"
+    if [ -d $path_dir ]; then
+        export PATH="${path_dir}:${PATH}"
+    fi
+}
+
+# append to PATH if the provided DIR exists
+function apath_exists() {
+    local path_dir="$1"
+    if [ -d $path_dir ]; then
+        export PATH="${PATH}:${path_dir}"
+    fi
+}
+
 # Put your fun stuff here.
 src_exists "~/v/bin/activate"
 src_exists "~/.ghcup/env"
 src_exists "~/.rye/env"
-src_exists "~/.cargo/env"
+src_exists "~/.cargo/env" # TODO: might not actually want this
 src_exists "/.grit/bin/env"
 
 # add .local/bin to path
-export PATH="$HOME/.local/bin:$PATH"
+ppath_exists "${HOME}/.local/bin"
+# add doom emacs to path
+ppath_exists "${HOME}/.config/emacs/bin"
+# add cargo bins to path
+ppath_exists "${HOME}/.cargo/bin"
 
 # if on gentoo box, add etckeeper hooks
 if [[ "$HOSTNAME" = "codeine" ]]; then

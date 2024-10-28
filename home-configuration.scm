@@ -4,17 +4,20 @@
 ;; specifies package names.  To reproduce the exact same profile, you also
 ;; need to capture the channels being used, as returned by "guix describe".
 ;; See the "Replicating Guix" section in the manual.
+;; TODO: add home-xdg-*service-types
 
 (use-modules
  (guix build utils)
  (gnu packages)
  (gnu services)
+ (gnu services security-token)
  (guix gexp)
  (guix channels)
  (gnu packages shells)
  (gnu packages gnupg)
  (gnu home)
  (gnu home services)
+ (gnu home services xdg)
  (gnu home services guix)
  (gnu home services gnupg)
  (gnu home services shells))
@@ -26,8 +29,13 @@
   (specifications->packages
    (list "guile"
          "glibc-locales"
+         "python-yubikey-manager"
+         "icedove"
          "inetutils"
          "i3status"
+         "bemenu"
+         "wl-clipboard"
+         "flameshot"
          "git"
          "nss-certs"
          "git-lfs"
@@ -35,16 +43,27 @@
          "ripgrep"
          "gnupg"
          "pinentry"
-	 "du-dust"
-	 "btop"
+         "ccid"
+         "du-dust"
+         "btop"
+         "cmake"
+         "openjdk"
          "kubectl"
          "minikube"
          "k9s"
+         "podman"
+         "podman-compose"
+         "prusa-slicer"
+         "freecad"
+         "openscad"
          "pciutils"
          "hwdata"
          "nmap"
+         "just"
+         "zlib"
          "strace"
-         "kmonad"
+         "libtool"
+         "gdb-multiarch"
          "node"
          "bat"
          "fontconfig"
@@ -52,11 +71,12 @@
          "aspell"
          "aspell-dict-en"
          "direnv"
-	 "ranger"
+         "ranger"
          "mumi"
+         "i3status-rust"
          "zoxide"
-         "awscli@2.2.0"
          "font-fira-mono"
+         "emacs-nerd-icons"
          "font-fira-sans"
          "font-fira-code"
          "font-awesome")))
@@ -64,39 +84,54 @@
  ;; services, run 'guix home search KEYWORD' in a terminal.
  (services
   (list
+   (service home-xdg-user-directories-service-type
+            (home-xdg-user-directories-configuration
+             (desktop "$HOME/desktop/")
+             (documents "$HOME/Documents/")
+             (download "$HOME/Downloads/")
+             (pictures "$HOME/Pictures/")
+             (videos "$HOME/Videos/")))
    (simple-service 'env-variables-service
                    home-environment-variables-service-type
                    `(("LANG" . "en_US.utf8")
                      ("LC_ALL" . "en_US.utf8")
                      ("GPG_TTY" . "$(tty)")
+                     ("TERM" . "xterm-256color")
                      ("SSL_CERT_DIR" . "/etc/ssl/certs")
                      ("SSL_CERT_FILE" . "/etc/ssl/certs/ca-certificates.crt")
                      ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
                      ("CURL_CA_BUNDLE" . "$SSL_CERT_FILE")
                      ("LESSHISTFILE" . "$XDG_CACHE_HOME/.lesshst")
+                     ;; fix bad gui's
+                     ("SDL_VIDEODRIVER" . "wayland")
+                     ("QT_QPA_PLATFORM" . "wayland")
+                     ("WEBKIT_DISABLE_COMPOSITING_MODE" . "1")
                      ("_JAVA_AWT_WM_NONREPARENTING" . #t)))
    (simple-service 'gnupg-files
                    home-files-service-type
                    `((".gnupg/gpg.conf" ,(local-file "configs/gpg.conf"))
                      (".gnupg/scdaemon.conf" ,(local-file "configs/scdaemon.conf"))))
    (simple-service 'ssh-config
-		   home-files-service-type
-		   `((".ssh/config" ,(local-file "configs/ssh-config"))))
+                   home-files-service-type
+                   `((".ssh/config" ,(local-file "configs/ssh-config"))))
    ;; TODO: get scripts working
    (simple-service 'scripts
-		   home-files-service-type
-		   `((".local/bin/reconfigure" ,(local-file "scripts/reconfigure"))))
+                   home-files-service-type
+                   `((".local/bin/reconfigure" ,(local-file "scripts/reconfigure"))))
    (simple-service 'config-files
                    home-xdg-configuration-files-service-type
                    `(("dunst/dunstrc" ,(local-file "configs/dunstrc"))
                      ("i3/config" ,(local-file "configs/i3-config"))
                      ("i3status/config" ,(local-file "configs/i3status-config"))
+                     ("i3status-rust/config.toml" ,(local-file "configs/i3status-rs.toml"))
+                     ("xdg-desktop-portal/sway-portals.conf" ,(local-file "configs/xdg-desktop-portal-sway-portals.conf"))
+                     ("sway/config" ,(local-file "configs/sway.config"))
                      ("polybar/config.ini" ,(local-file "configs/polybar.ini"))
                      ("polybar/launch" ,(local-file "configs/launch_polybar.sh"))
                      ("picom/picom.conf" ,(local-file "configs/picom.conf"))
                      ("rofi/config.rasi" ,(local-file "configs/rofi-config.rasi"))
                      ("rofi/theme.rasi" ,(local-file "configs/rofi-themes/black.rasi"))
-		     ("starship.toml" ,(local-file "configs/starship.toml"))
+                     ("starship.toml" ,(local-file "configs/starship.toml"))
                      ("git/config" ,(local-file "configs/git-config"))
                      ("git/ignore" ,(local-file "configs/git-ignore"))
                      ("wezterm/wezterm.lua" ,(local-file "configs/wezterm.lua"))
@@ -138,6 +173,7 @@
              (extra-content "grab\nallow-emacs-pinentry\nallow-loopback-pinentry\n")))
    (service home-bash-service-type
             (home-bash-configuration
+             (guix-defaults? #f)
              (aliases
               '(("docker-compose" . "docker compose")
                                         ;("ls" . "lsd"))
