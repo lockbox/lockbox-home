@@ -60,7 +60,8 @@ src_exists "~/v/bin/activate"
 src_exists "~/.ghcup/env"
 src_exists "~/.rye/env"
 src_exists "~/.cargo/env" # TODO: might not actually want this
-src_exists "/.grit/bin/env"
+src_exists "~/.grit/bin/env"
+src_exists "~/.elan/env"
 
 # add .local/bin to path
 ppath_exists "${HOME}/.local/bin"

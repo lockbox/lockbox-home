@@ -3,6 +3,16 @@ Host github.com
     User lockbox
     IdentityFile ~/.ssh/id_devkey
 
+Host ammo-can
+    HostName ammo-can.netbird.cloud
+    User lockbox
+    IdentityFile ~/.ssh/id_devkey
+
+Host monad
+    HostName monad.netbird.cloud
+    User lockbox
+    IdentityFile ~/.ssh/id_devkey
+
 AddKeysToAgent yes
 Compression yes
 HashKnownHosts yes
