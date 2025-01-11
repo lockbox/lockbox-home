@@ -4,7 +4,14 @@
 ;; specifies package names.  To reproduce the exact same profile, you also
 ;; need to capture the channels being used, as returned by "guix describe".
 ;; See the "Replicating Guix" section in the manual.
-;; TODO: add home-xdg-*service-types
+;; TODO: add home-xdg-*service-type's
+;; TODO: add home-fontconfig-service-type
+;; TODO: add home-sway-service-type
+;; TODO: add home-openssh-service-type
+;; TODO: add home-bash-service-type
+;; TODO: add home-inputrc-service-type
+;; TODO: add home-batsignal-service-type
+;; TODO: add home-syncthing-service-type
 
 (use-modules
  (guix build utils)
@@ -27,66 +34,150 @@
  ;; Home profile, under ~/.guix-home/profile.
  (packages
   (specifications->packages
-   (list "guile"
-         "glibc-locales"
-         "python-yubikey-manager"
-         "icedove"
-         "inetutils"
-         "i3status"
-         "bemenu"
-         "wl-clipboard"
-         "flameshot"
-         "git"
-         "nss-certs"
-         "git-lfs"
-         "fd"
-         "ripgrep"
-         "gnupg"
-         "pinentry"
-         "ccid"
-         "du-dust"
-         "btop"
-         "cmake"
-         "openjdk"
-         "kubectl"
-         "minikube"
-         "k9s"
-         "podman"
-         "podman-compose"
-         "prusa-slicer"
-         "freecad"
-         "openscad"
-         "pciutils"
-         "hwdata"
-         "nmap"
-         "just"
-         "zlib"
-         "strace"
-         "libtool"
-         "gdb-multiarch"
-         "node"
-         "bat"
-         "fontconfig"
-         "curl"
-         "aspell"
-         "aspell-dict-en"
-         "direnv"
-         "ranger"
-         "mumi"
-         "i3status-rust"
-         "zoxide"
-         "font-fira-mono"
-         "emacs-nerd-icons"
-         "font-fira-sans"
-         "font-fira-code"
-         "font-awesome")))
+   (list
+    ;; base
+    "nss-certs"
+    "glibc-locales"
+    "zlib"
+    "libtool"
+
+    ;; guix
+    "mumi"
+    "guile"
+
+    ;; security
+    "gnupg"
+    "pinentry"
+    "ccid"
+    "python-yubikey-manager"
+
+    ;; messaging
+    "mu"
+    "fetchmail"
+    "icedove"
+    "weechat"
+
+    ;; git
+    "git"
+    "git:send-email"
+    "git-lfs"
+
+    ;; wm
+    "i3status"
+    "i3status-rust"
+    "bemenu"
+    "wl-clipboard"
+    "flameshot"
+    "waylock"
+
+    ;; infra
+    "wireguard-tools"
+    ;;"ansible"           ; broken on master
+    ;;"ansible-core"      ; broken on master
+    "k9s"
+    "kubectl"
+    "python-netaddr"
+    "helm-kubernetes"
+    "podman"
+    "podman-compose"
+
+    ;; 3d printing
+    "prusa-slicer"
+    "freecad"
+    "openscad"
+
+    ;; programming
+    "zig"
+    "cloc"
+    "mold"
+    "node"
+    "cmake"
+    "ninja"
+    "tokei"
+    "openjdk"
+    "ccache"
+    "googletest"
+    "actionlint"
+    "shellcheck"
+    "clang"
+    "llvm"
+
+
+    ;; firmware stuff
+    "uefitool"
+    "efitools"
+    "sbsigntools"
+    "efi-analyzer"
+    "gnu-efi"
+    "squashfs-tools-ng"
+    "dfu-util"
+    "teensy-loader-cli"
+    "teensy-udev-rules"
+    "avrdude"
+    "openocd"
+
+    ;; random
+    "elfutils"
+    "patchelf"
+
+    ;; utils
+    "direnv"
+    "ranger"
+    "pciutils"
+    "fd"
+    "starship"
+    "lsd"
+    "du-dust"
+    "ripgrep"
+    "watchexec"
+    "hwdata"
+    "nmap"
+    "just"
+    "inetutils"
+    "netcat"
+    "zoxide"
+    "feh"
+    "strace"
+    "btop"
+    "curl"
+    "gzip"
+    "bzip2"
+    "duckdb"
+    "xz"
+    "lzo"
+    "lz4"
+    "bat"
+    "wget"
+    "gdb-multiarch"
+    "poke"
+    "emacs-poke-mode"
+    "restic"
+    "rclone"
+    "password-store"
+    "qtpass"
+
+    ;; dict + ssg
+    "aspell"
+    "aspell-dict-en"
+    "pandoc"
+    "haunt"
+
+    ;; fonts
+    "fontconfig"
+    "freetype@2"          ; TODO: upstream symlink
+    "font-fira-mono"
+    "emacs-nerd-icons"
+    "font-fira-sans"
+    "font-fira-code"
+    "font-awesome")))
+
  ;; Below is the list of Home services.  To search for available
  ;; services, run 'guix home search KEYWORD' in a terminal.
  (services
   (list
    (service home-xdg-user-directories-service-type
             (home-xdg-user-directories-configuration
-             (desktop "$HOME/desktop/")
+             (desktop "$HOME/Desktop/")
              (documents "$HOME/Documents/")
              (download "$HOME/Downloads/")
              (pictures "$HOME/Pictures/")
@@ -102,11 +193,12 @@
                      ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
                      ("CURL_CA_BUNDLE" . "$SSL_CERT_FILE")
                      ("LESSHISTFILE" . "$XDG_CACHE_HOME/.lesshst")
+                     ("RIPGREP_CONFIG_PATH" . "$XDG_CONFIG_HOME/ripgreprc")
                      ;; fix bad gui's
                      ("SDL_VIDEODRIVER" . "wayland")
                      ("QT_QPA_PLATFORM" . "wayland")
                      ("WEBKIT_DISABLE_COMPOSITING_MODE" . "1")
-                     ("_JAVA_AWT_WM_NONREPARENTING" . #t)))
+                     ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
    (simple-service 'gnupg-files
                    home-files-service-type
                    `((".gnupg/gpg.conf" ,(local-file "configs/gpg.conf"))
@@ -132,39 +224,40 @@
                      ("rofi/config.rasi" ,(local-file "configs/rofi-config.rasi"))
                      ("rofi/theme.rasi" ,(local-file "configs/rofi-themes/black.rasi"))
                      ("starship.toml" ,(local-file "configs/starship.toml"))
+                     ("ripgreprc" ,(local-file "configs/ripgreprc"))
                      ("git/config" ,(local-file "configs/git-config"))
                      ("git/ignore" ,(local-file "configs/git-ignore"))
                      ("wezterm/wezterm.lua" ,(local-file "configs/wezterm.lua"))
                      ("zellij/config.kdl" ,(local-file "configs/zellij-config.kdl"))))
    (simple-service 'extra-channels-service
                    home-channels-service-type
-                   (list (channel
-                          (name 'guix)
-                          (url "https://git.savannah.gnu.org/git/guix.git")
-                          (branch "master")
-                          (introduction
-                           (make-channel-introduction
-                            "9edb3f66fd807b096b48283debdcddccfea34bad"
-                            (openpgp-fingerprint
-                             "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
-                         (channel
-                          (name 'small-guix)
-                          (url "https://gitlab.com/orang3/small-guix")
-                          ;; Enable signature verification:
-                          (introduction
-                           (make-channel-introduction
-                            "f260da13666cd41ae3202270784e61e062a3999c"
-                            (openpgp-fingerprint
-                             "8D10 60B9 6BB8 292E 829B  7249 AED4 1CC1 93B7 01E2"))))
-                         (channel
-                          (name 'nonguix)
-                          (url "https://gitlab.com/nonguix/nonguix")
-                          (branch "master")
-                          (introduction
-                           (make-channel-introduction
-                            "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-                            (openpgp-fingerprint
-                             "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
+                   (list
+                    (channel
+                     (name 'guix)
+                     (url "https://git.savannah.gnu.org/git/guix.git")
+                     (branch "master")
+                     (introduction
+                      (make-channel-introduction
+                       "9edb3f66fd807b096b48283debdcddccfea34bad"
+                       (openpgp-fingerprint
+                        "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+                    (channel
+                     (name 'small-guix)
+                     (url "https://codeberg.org/fishinthecalculator/small-guix.git")
+                     (introduction
+                      (make-channel-introduction
+                       "f260da13666cd41ae3202270784e61e062a3999c"
+                       (openpgp-fingerprint
+                        "8D10 60B9 6BB8 292E 829B  7249 AED4 1CC1 93B7 01E2"))))
+                    (channel
+                     (name 'nonguix)
+                     (url "https://gitlab.com/nonguix/nonguix")
+                     (branch "master")
+                     (introduction
+                      (make-channel-introduction
+                       "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+                       (openpgp-fingerprint
+                        "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
    (service home-gpg-agent-service-type
             (home-gpg-agent-configuration
              (pinentry-program
@@ -176,7 +269,7 @@
              (guix-defaults? #f)
              (aliases
               '(("docker-compose" . "docker compose")
-                                        ;("ls" . "lsd"))
+                ("ls" . "lsd")
                 ))
              (bashrc
               (list

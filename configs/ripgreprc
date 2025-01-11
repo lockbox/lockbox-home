@@ -1,0 +1,15 @@
+# limit line explosion to 120 chars
+--max-columns=120
+--max-columns-preview
+
+# use mmap when possible
+--mmap
+
+# hidden files by default
+--hidden
+
+# smarter case handling
+--smart-case
+
+# compressed files (this does not include archives)
+--search-zip
