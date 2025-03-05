@@ -54,7 +54,6 @@
     ;; messaging
     "mu"
     "fetchmail"
-    "icedove"
     "weechat"
 
     ;; git
@@ -95,6 +94,7 @@
     "ninja"
     "tokei"
     "openjdk"
+    "openjdk:jdk"
     "ccache"
     "googletest"
     "actionlint"
@@ -187,9 +187,15 @@
                    `(("LANG" . "en_US.utf8")
                      ("LC_ALL" . "en_US.utf8")
                      ("GPG_TTY" . "$(tty)")
+                     ;; set editor to use a new emacs frame,
+                     ;; and start an emacs daemon if it does not yet
+                     ;; exist
+                     ("EDITOR" . "$(which emacsclient) -c -a=\"\"")
                      ("TERM" . "xterm-256color")
+                     ;; TODO: only set when on foreign distro
                      ("SSL_CERT_DIR" . "/etc/ssl/certs")
                      ("SSL_CERT_FILE" . "/etc/ssl/certs/ca-certificates.crt")
+                     ;; end foreign distro todo
                      ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
                      ("CURL_CA_BUNDLE" . "$SSL_CERT_FILE")
                      ("LESSHISTFILE" . "$XDG_CACHE_HOME/.lesshst")
