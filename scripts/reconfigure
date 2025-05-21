@@ -2,4 +2,4 @@
 #
 # reconfigure guix home
 
-guix home reconfigure ~/.config/lockbox-home/home-configuration.scm
+guix home reconfigure ~/.config/lockbox-home/home-configuration.scm --no-offload --no-grafts

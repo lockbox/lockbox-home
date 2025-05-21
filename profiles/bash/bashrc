@@ -15,34 +15,36 @@
 # past this point for scp and rcp, and it's important to refrain from
 # outputting anything in those cases.
 if [[ $- != *i* ]] ; then
-	# Shell is non-interactive.  Be done now!
-	return
+    # Shell is non-interactive.  Be done now!
+    return
 fi
 
+# shellcheck disable=1090
 source ~/.profile
 
 # add guix to env
 if [ -d "$HOME/.guix-profile" ]; then
   GUIX_PROFILE="$HOME/.guix-profile"
-  source "$GUIX_PROFILE/etc/profile"
+  source "${GUIX_PROFILE}/etc/profile"
 fi
-if [ -d "$HOME/.config/guix" ]; then
-  GUIX_PROFILE="$HOME/.config/guix/current"
+if [ -d "${HOME}/.config/guix" ]; then
+  GUIX_PROFILE="${HOME}/.config/guix/current"
   . "$GUIX_PROFILE/etc/profile"
 fi
 
 # source the file if the provided FILE exists
 function src_exists() {
     local fpath="$1"
-    if [ -f $fpath ]; then
-        source $fpath
+    if [ -f "${fpath}" ]; then
+      # shellcheck disable=SC1090
+      source "${fpath}"
     fi
 }
 
 # prepend to PATH if the provided DIR exists
 function ppath_exists() {
     local path_dir="$1"
-    if [ -d $path_dir ]; then
+    if [ -d "${path_dir}" ]; then
         export PATH="${path_dir}:${PATH}"
     fi
 }
@@ -50,12 +52,12 @@ function ppath_exists() {
 # append to PATH if the provided DIR exists
 function apath_exists() {
     local path_dir="$1"
-    if [ -d $path_dir ]; then
+    if [ -d "${path_dir}" ]; then
         export PATH="${PATH}:${path_dir}"
     fi
 }
 
-# Put your fun stuff here.
+# Source custom env installations
 src_exists "~/v/bin/activate"
 src_exists "~/.ghcup/env"
 src_exists "~/.rye/env"
@@ -69,6 +71,8 @@ ppath_exists "${HOME}/.local/bin"
 ppath_exists "${HOME}/.config/emacs/bin"
 # add cargo bins to path
 ppath_exists "${HOME}/.cargo/bin"
+# add deno to path
+ppath_exists "${HOME}/.deno/bin"
 
 # add shell hooks
 if command -v zoxide &> /dev/null; then
@@ -80,6 +84,21 @@ fi
 if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
+
+# add all bash completions for guix-installed programs
+for file in ~/.guix-profile/etc/bash_completion.d/* ~/.guix-profile/share/bash-completion/completions/*; do
+  # shellcheck disable=SC1090
+  [ -r "${file}" ] && . "${file}"
+done
+
+
+##
+## One-off support for things
+##
+if [ -d "${HOME}/.deno" ]; then
+  export DENO_INSTALL="${HOME}/.deno"
+fi
+
 
 # asni seq to reset color
 alias fix-color='echo -ne "\033[0m"'
