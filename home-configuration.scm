@@ -43,7 +43,6 @@
 
     ;; guix
     "mumi"
-    "guile"
 
     ;; security
     "gnupg"
@@ -101,6 +100,8 @@
     "shellcheck"
     "clang"
     "llvm"
+    "guile-next"
+    "guile-ares-rs"
 
 
     ;; firmware stuff
@@ -115,6 +116,7 @@
     "teensy-udev-rules"
     "avrdude"
     "openocd"
+    "binwalk"
 
     ;; random
     "elfutils"
@@ -161,6 +163,7 @@
     "aspell-dict-en"
     "pandoc"
     "haunt"
+    "hugo"
 
     ;; fonts
     "fontconfig"
@@ -276,6 +279,8 @@
              (aliases
               '(("docker-compose" . "docker compose")
                 ("ls" . "lsd")
+                ("vim" . "emacsclient -nw -a=''")
+                ("e" . "emacsclient -a=''")
                 ))
              (bashrc
               (list
