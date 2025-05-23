@@ -2,4 +2,13 @@
 #
 # reconfigure guix home
 
-guix home reconfigure ~/.config/lockbox-home/home-configuration.scm --no-offload --no-grafts
+# source: https://stackoverflow.com/a/4774063
+_SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+CHANNELS_LOCK_PATH="$(dirname "${_SCRIPT_PATH}")/channels-lock.scm"
+GUIX_OPTS="--no-offload --no-grafts"
+
+
+# shellcheck disable=SC2086
+# the arg parser for guix is mega-naive
+guix time-machine -C "${CHANNELS_LOCK_PATH}" ${GUIX_OPTS} -- \
+    home reconfigure ${GUIX_OPTS} ~/.config/lockbox-home/home-configuration.scm

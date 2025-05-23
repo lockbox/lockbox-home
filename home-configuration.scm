@@ -102,6 +102,7 @@
     "llvm"
     "guile-next"
     "guile-ares-rs"
+    "emacs-arei"
 
 
     ;; firmware stuff
@@ -190,6 +191,7 @@
                    `(("LANG" . "en_US.utf8")
                      ("LC_ALL" . "en_US.utf8")
                      ("GPG_TTY" . "$(tty)")
+                     ("EMACSLOADPATH" . "$HOME/.guix-home/profile/share/emacs/site-lisp:/usr/share/emacs/site-lisp")
                      ;; set editor to use a new emacs frame,
                      ;; and start an emacs daemon if it does not yet
                      ;; exist
