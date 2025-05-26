@@ -70,8 +70,8 @@
 
     ;; infra
     "wireguard-tools"
-    ;;"ansible"           ; broken on master
-    ;;"ansible-core"      ; broken on master
+    "ansible"
+    "ansible-core"
     "k9s"
     "kubectl"
     "python-netaddr"
@@ -103,7 +103,8 @@
     "guile-next"
     "guile-ares-rs"
     "emacs-arei"
-
+    "emacs-next"
+    "pinentry-emacs"
 
     ;; firmware stuff
     "uefitool"
@@ -191,7 +192,8 @@
                    `(("LANG" . "en_US.utf8")
                      ("LC_ALL" . "en_US.utf8")
                      ("GPG_TTY" . "$(tty)")
-                     ("EMACSLOADPATH" . "$HOME/.guix-home/profile/share/emacs/site-lisp:/usr/share/emacs/site-lisp")
+                     ;; TODO: figure out how to pickup guix installed emacs packages
+                     ;;("EMACSLOADPATH" . "$HOME/.guix-home/profile/share/emacs/site-lisp:/usr/share/emacs/site-lisp")
                      ;; set editor to use a new emacs frame,
                      ;; and start an emacs daemon if it does not yet
                      ;; exist
