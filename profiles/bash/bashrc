@@ -71,6 +71,8 @@ ppath_exists "${HOME}/.local/bin"
 ppath_exists "${HOME}/.config/emacs/bin"
 # add cargo bins to path
 ppath_exists "${HOME}/.cargo/bin"
+# add go-home to path
+ppath_exists "${HOME}/.go/bin"
 # add deno to path
 ppath_exists "${HOME}/.deno/bin"
 

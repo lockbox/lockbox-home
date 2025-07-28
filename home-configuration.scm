@@ -85,6 +85,7 @@
     "openscad"
 
     ;; programming
+    "go"
     "zig"
     "cloc"
     "mold"
@@ -207,6 +208,7 @@
                      ("CURL_CA_BUNDLE" . "$SSL_CERT_FILE")
                      ("LESSHISTFILE" . "$XDG_CACHE_HOME/.lesshst")
                      ("RIPGREP_CONFIG_PATH" . "$XDG_CONFIG_HOME/ripgreprc")
+                     ("GOPATH" . "$HOME/.go")
                      ;; fix bad gui's
                      ("SDL_VIDEODRIVER" . "wayland")
                      ("QT_QPA_PLATFORM" . "wayland")
