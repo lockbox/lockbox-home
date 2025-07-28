@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# update the channels-lock.scm
+
+
+# source: https://stackoverflow.com/a/4774063
+_SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+CHANNELS_LOCK_PATH="$(dirname "${_SCRIPT_PATH}")/channels-lock.scm"
+CHANNELS_BASE_PATH="$(dirname "${_SCRIPT_PATH}")/channels-base.scm"
+GUIX_OPTS="--no-grafts --no-offload"
+
+
+# shellcheck disable=SC2086
+# the arg parser for guix is mega-naive
+guix time-machine -C "${CHANNELS_BASE_PATH}" ${GUIX_OPTS} -- \
+     describe -f channels > "${CHANNELS_LOCK_PATH}"
