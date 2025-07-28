@@ -48,6 +48,7 @@
     "gnupg"
     "pinentry"
     "ccid"
+    "pcsc-lite"
     "python-yubikey-manager"
 
     ;; messaging
@@ -127,6 +128,8 @@
     "patchelf"
 
     ;; utils
+    "gimp"
+    "kitty"
     "direnv"
     "ranger"
     "pciutils"
@@ -151,6 +154,7 @@
     "duckdb"
     "xz"
     "lzo"
+    "unrar-free"
     "lz4"
     "bat"
     "wget"
