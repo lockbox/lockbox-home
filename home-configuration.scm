@@ -93,6 +93,7 @@
     "cmake"
     "ninja"
     "tokei"
+    "bear"
     "openjdk"
     "openjdk:jdk"
     "ccache"
