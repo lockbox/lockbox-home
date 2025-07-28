@@ -1,9 +1,9 @@
 (list (channel
        (name 'guix)
-       (url "https://git.guix.gnu.org/git/guix.git")
+       (url "https://codeberg.org/guix/guix.git")
        (branch "master")
        (commit
-        "409bbd801428b90701f625c38e6b5840f12a187b")
+        "ce72ee328115a081a208f93bbc40c5c4a602d5c4")
        (introduction
         (make-channel-introduction
          "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -25,7 +25,7 @@
        (url "https://gitlab.com/nonguix/nonguix")
        (branch "master")
        (commit
-        "595c2155a61ef7e552269cb1c569a33e3ec32bb2")
+        "dff018fa52c8db55dbff7a4a5483ec7e771ea305")
        (introduction
         (make-channel-introduction
          "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
