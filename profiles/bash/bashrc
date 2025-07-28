@@ -84,6 +84,9 @@ fi
 if command -v starship &> /dev/null; then
   eval "$(starship init bash)"
 fi
+if command -v uv &> /dev/null; then
+  eval "$(uv generate-shell-completion bash)"
+fi
 
 # add all bash completions for guix-installed programs
 for file in ~/.guix-profile/etc/bash_completion.d/* ~/.guix-profile/share/bash-completion/completions/*; do
