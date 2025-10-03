@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Install Doom Emacs manually when not using full Guix Home installation
+
+set -e
+
+EMACS_DIR="$HOME/.config/emacs"
+DOOM_DIR="$HOME/.config/doom"
+DOOM_REPO="https://github.com/doomemacs/doomemacs"
+
+echo "Doom Emacs Installation Script"
+echo "=============================="
+
+# Check if Emacs is installed
+if ! command -v emacs &> /dev/null; then
+    echo "Error: Emacs is not installed. Please install Emacs first."
+    echo ""
+    echo "You can install it via:"
+    echo "  - Guix: guix install emacs-next"
+    echo "  - Your system package manager"
+    exit 1
+fi
+
+# Check Emacs version (Doom requires 27.1+)
+EMACS_VERSION=$(emacs --version | head -n1 | cut -d' ' -f3)
+echo "Found Emacs version: $EMACS_VERSION"
+
+# Check if Doom is already installed
+if [ -d "$EMACS_DIR" ]; then
+    echo ""
+    echo "Warning: Emacs configuration directory already exists at $EMACS_DIR"
+    read -p "Do you want to backup and replace it? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        BACKUP_DIR="$EMACS_DIR.backup.$(date +%Y%m%d-%H%M%S)"
+        echo "Backing up existing config to $BACKUP_DIR"
+        mv "$EMACS_DIR" "$BACKUP_DIR"
+    else
+        echo "Aborting installation."
+        exit 1
+    fi
+fi
+
+# Check if Doom config exists
+if [ ! -d "$DOOM_DIR" ]; then
+    echo ""
+    echo "Warning: Doom configuration not found at $DOOM_DIR"
+    echo "Make sure you have deployed the Guix Home configuration first:"
+    echo "  ~/.local/bin/reconfigure"
+    read -p "Continue anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+# Clone Doom Emacs
+echo ""
+echo "Cloning Doom Emacs from $DOOM_REPO..."
+git clone --depth 1 "$DOOM_REPO" "$EMACS_DIR"
+
+# Install Doom
+echo ""
+echo "Installing Doom Emacs..."
+"$EMACS_DIR/bin/doom" install
+
+# Sync packages if config exists
+if [ -d "$DOOM_DIR" ]; then
+    echo ""
+    echo "Syncing Doom packages based on your configuration..."
+    "$EMACS_DIR/bin/doom" sync
+fi
+
+echo ""
+echo "Doom Emacs installation complete!"
+echo ""
+echo "You can now:"
+echo "  - Start Emacs GUI: emacs"
+echo "  - Start Emacs in terminal: emacs -nw"
+echo "  - Use the doom CLI: ~/.config/emacs/bin/doom"
+echo ""
+echo "Useful Doom commands:"
+echo "  doom sync       - Sync packages with config"
+echo "  doom upgrade    - Update Doom and packages"
+echo "  doom doctor     - Diagnose common issues"
+echo "  doom help       - Show all commands"
+echo ""
+echo "Note: Add ~/.config/emacs/bin to your PATH for easy doom access"
