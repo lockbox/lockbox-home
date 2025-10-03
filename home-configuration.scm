@@ -27,7 +27,52 @@
  (gnu home services xdg)
  (gnu home services guix)
  (gnu home services gnupg)
- (gnu home services shells))
+ (gnu home services shells)
+ (ice-9 ftw)
+ (ice-9 match)
+ (srfi srfi-1))
+
+;; Helper function to recursively map a directory's files for deployment
+(define (directory->config-alist source-dir target-dir)
+  "Recursively map all files from SOURCE-DIR to TARGET-DIR for home-xdg-configuration-files-service-type.
+   Returns an alist of (target-path . local-file) pairs."
+  (define (strip-prefix prefix path)
+    (if (string-prefix? prefix path)
+        (substring path (string-length prefix))
+        path))
+
+  (define (process-directory dir prefix)
+    (let ((entries '()))
+      (ftw dir
+           (lambda (path stat flag)
+             (cond
+              ;; Regular file
+              ((eq? flag 'regular)
+               (let* ((relative-path (strip-prefix prefix path))
+                      (target-path (string-append target-dir relative-path)))
+                 (set! entries
+                       (cons (list target-path
+                                   (local-file path
+                                              (string-append "doom-"
+                                                             (basename path))
+                                              #:recursive? #f))
+                             entries))))
+              ;; Directory - just traverse it
+              ((eq? flag 'directory) #t)
+              ;; Skip everything else
+              (else #t))
+             #t))
+      entries))
+
+  ;; Resolve source-dir relative to this file's location
+  (let* ((this-file (current-source-location))
+         (this-dir (dirname (assoc-ref this-file 'filename)))
+         (absolute-source-dir (string-append this-dir "/" source-dir))
+         ;; Ensure source-dir ends with /
+         (prefix (if (string-suffix? "/" absolute-source-dir)
+                     absolute-source-dir
+                     (string-append absolute-source-dir "/"))))
+    (process-directory absolute-source-dir prefix)))
 
 (home-environment
   ;; Below is the list of packages that will show up in your
@@ -232,23 +277,26 @@
                     `((".local/bin/reconfigure" ,(local-file "scripts/reconfigure"))))
     (simple-service 'config-files
                     home-xdg-configuration-files-service-type
-                    `(("dunst/dunstrc" ,(local-file "configs/dunstrc"))
-                      ("i3/config" ,(local-file "configs/i3-config"))
-                      ("i3status/config" ,(local-file "configs/i3status-config"))
-                      ("i3status-rust/config.toml" ,(local-file "configs/i3status-rs.toml"))
-                      ("xdg-desktop-portal/sway-portals.conf" ,(local-file "configs/xdg-desktop-portal-sway-portals.conf"))
-                      ("sway/config" ,(local-file "configs/sway.config"))
-                      ("polybar/config.ini" ,(local-file "configs/polybar.ini"))
-                      ("polybar/launch" ,(local-file "configs/launch_polybar.sh"))
-                      ("picom/picom.conf" ,(local-file "configs/picom.conf"))
-                      ("rofi/config.rasi" ,(local-file "configs/rofi-config.rasi"))
-                      ("rofi/theme.rasi" ,(local-file "configs/rofi-themes/black.rasi"))
-                      ("starship.toml" ,(local-file "configs/starship.toml"))
-                      ("ripgreprc" ,(local-file "configs/ripgreprc"))
-                      ("git/config" ,(local-file "configs/git-config"))
-                      ("git/ignore" ,(local-file "configs/git-ignore"))
-                      ("wezterm/wezterm.lua" ,(local-file "configs/wezterm.lua"))
-                      ("zellij/config.kdl" ,(local-file "configs/zellij-config.kdl"))))
+                    (append
+                     `(("dunst/dunstrc" ,(local-file "configs/dunstrc"))
+                       ("i3/config" ,(local-file "configs/i3-config"))
+                       ("i3status/config" ,(local-file "configs/i3status-config"))
+                       ("i3status-rust/config.toml" ,(local-file "configs/i3status-rs.toml"))
+                       ("xdg-desktop-portal/sway-portals.conf" ,(local-file "configs/xdg-desktop-portal-sway-portals.conf"))
+                       ("sway/config" ,(local-file "configs/sway.config"))
+                       ("polybar/config.ini" ,(local-file "configs/polybar.ini"))
+                       ("polybar/launch" ,(local-file "configs/launch_polybar.sh"))
+                       ("picom/picom.conf" ,(local-file "configs/picom.conf"))
+                       ("rofi/config.rasi" ,(local-file "configs/rofi-config.rasi"))
+                       ("rofi/theme.rasi" ,(local-file "configs/rofi-themes/black.rasi"))
+                       ("starship.toml" ,(local-file "configs/starship.toml"))
+                       ("ripgreprc" ,(local-file "configs/ripgreprc"))
+                       ("git/config" ,(local-file "configs/git-config"))
+                       ("git/ignore" ,(local-file "configs/git-ignore"))
+                       ("wezterm/wezterm.lua" ,(local-file "configs/wezterm.lua"))
+                       ("zellij/config.kdl" ,(local-file "configs/zellij-config.kdl")))
+                     ;; Doom Emacs configuration - recursively copy entire directory
+                     (directory->config-alist "configs/doom" "doom")))
     (simple-service 'extra-channels-service
                     home-channels-service-type
                     (list

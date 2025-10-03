@@ -1,0 +1,17 @@
+* %?
+:PROPERTIES:
+:EXPORT_DATE: %U
+:END:
+** Description
+  - Brief one-sentence project overview.
+
+** Milestones
+  - [ ] Milestone 1
+  - [ ] Milestone 2
+
+** Tasks
+  - [ ] TODO Task 1
+  - [ ] TODO Task 2
+
+** Updates
+  - Update 1
