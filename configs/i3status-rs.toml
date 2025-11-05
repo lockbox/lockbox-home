@@ -1,5 +1,5 @@
-#[theme]
-#theme = "srcery"
+[theme]
+theme = "space-villain"
 [icons]
 icons = "none"
 
