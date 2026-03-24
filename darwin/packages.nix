@@ -1,0 +1,70 @@
+{ pkgs, ... }:
+
+{
+  home.packages = with pkgs; [
+    # Security / credentials
+    gnupg
+    pinentry-curses
+    pass
+    yubikey-manager
+    restic
+    rclone
+
+    # Version control
+    git
+    git-lfs
+
+    # Languages / runtimes
+    go
+    zig
+    nodejs
+    openjdk
+
+    # Build tools
+    cmake
+    ninja
+    bear
+    ccache
+
+    # Dev utilities
+    cloc
+    tokei
+    shellcheck
+    actionlint
+    gdb
+
+    # Terminal / shell utilities
+    lsd
+    btop
+    ripgrep
+    fd
+    jq
+    just
+    watchexec
+    zellij
+
+    # Network / fetch
+    curl
+    wget
+    nmap
+
+    # Infrastructure
+    wireguard-tools
+    ansible
+    k9s
+    kubectl
+    kubernetes-helm
+
+    # Documents
+    pandoc
+    aspell
+    aspellDicts.en
+
+    # Compression
+    lz4
+    xz
+
+    # Data
+    duckdb
+  ];
+}
