@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Automatically fetch emacs-plus patch hashes and update darwin/emacs.nix
+# Uses builtins.fetchurl nix32 hash format.
+# Resolves GitHub symlink patches (files containing just a relative path).
+#
+# Usage: scripts/update-emacs-patches [emacs-30]
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EMACS_NIX="${SCRIPT_DIR}/../darwin/emacs.nix"
+BRANCH="${1:-emacs-30}"
+GH_BASE="https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches"
+
+PATCHES=(
+  "fix-window-role.patch"
+  "round-undecorated-frame.patch"
+  "system-appearance.patch"
+)
+
+echo ":: Updating emacs-plus patch hashes for ${BRANCH}"
+
+for patch in "${PATCHES[@]}"; do
+  url="${GH_BASE}/${BRANCH}/${patch}"
+  echo "   Fetching ${patch}..."
+
+  # Check if the file is a symlink (content is just a relative path)
+  content=$(curl -sL "${url}")
+  if [[ "${content}" == ../* ]]; then
+    # Resolve the relative path
+    resolved=$(echo "${content}" | sed "s|^\.\./||")
+    url="${GH_BASE}/${resolved}"
+    echo "   -> symlink, resolved to ${url}"
+  fi
+
+  nix32_hash=$(nix-prefetch-url --type sha256 "${url}" 2>/dev/null)
+  echo "   -> ${nix32_hash}"
+
+  # Update the nix32 hash on the sha256 line following this patch's filename
+  escaped_patch="${patch//./\\.}"
+  if [[ "$(uname)" == "Darwin" ]]; then
+    sed -i '' "/${escaped_patch}/{n;s|sha256 = \".*\"|sha256 = \"${nix32_hash}\"|;}" "${EMACS_NIX}"
+  else
+    sed -i "/${escaped_patch}/{n;s|sha256 = \".*\"|sha256 = \"${nix32_hash}\"|;}" "${EMACS_NIX}"
+  fi
+done
+
+# Update the patchBranch variable if branch changed
+current_branch=$(grep 'patchBranch = ' "${EMACS_NIX}" | sed 's/.*"\(.*\)".*/\1/')
+if [[ -n "${current_branch}" && "${current_branch}" != "${BRANCH}" ]]; then
+  echo ":: Updating patchBranch from ${current_branch} to ${BRANCH}"
+  if [[ "$(uname)" == "Darwin" ]]; then
+    sed -i '' "s|patchBranch = \"${current_branch}\"|patchBranch = \"${BRANCH}\"|" "${EMACS_NIX}"
+  else
+    sed -i "s|patchBranch = \"${current_branch}\"|patchBranch = \"${BRANCH}\"|" "${EMACS_NIX}"
+  fi
+fi
+
+echo ":: Done. Updated ${EMACS_NIX}"

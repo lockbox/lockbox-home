@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FLAKE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+echo ":: Rebuilding nix-darwin from ${FLAKE_DIR}..."
+sudo darwin-rebuild switch --flake "${FLAKE_DIR}"
+echo ":: Done."
