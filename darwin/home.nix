@@ -30,7 +30,9 @@
     "$HOME/go/bin"
     "$HOME/.local/bin"
     "$HOME/.config/emacs/bin"
+    "$HOME/.opencode/bin"
     "/opt/homebrew/bin"
+    "/opt/podman/bin"
   ];
 
   # Starship prompt (native module + shared config)

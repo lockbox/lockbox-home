@@ -61,6 +61,8 @@ let
     ppath_exists "''${HOME}/.deno/bin"
     # add homebrew to path
     ppath_exists "/opt/homebrew/bin"
+    # add opencode to path
+    ppath_exists "''${HOME}/.opencode/bin"
 
     if [ -d "''${HOME}/.deno" ]; then
       export DENO_INSTALL="''${HOME}/.deno"

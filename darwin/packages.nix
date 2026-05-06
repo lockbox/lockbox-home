@@ -18,6 +18,7 @@
     go
     zig
     nodejs
+    bun
     openjdk
 
     # Build tools
@@ -42,6 +43,7 @@
     just
     watchexec
     zellij
+    ranger
 
     # Network / fetch
     curl
@@ -51,6 +53,8 @@
     # Infrastructure
     wireguard-tools
     ansible
+    opentofu
+    awscli2
     k9s
     kubectl
     kubernetes-helm
