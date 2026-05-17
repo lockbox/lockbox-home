@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, lib, ... }:
 
 {
   networking.hostName = "pane";
@@ -27,12 +27,110 @@
     ephemeral = true;
     maxJobs   = 4;
     systems   = [ "aarch64-linux" "x86_64-linux" ];
-    config    = { lib, ... }: {
+    config    = { config, lib, pkgs, ... }: {
+      imports = [ inputs.sops-nix.nixosModules.sops ];
+
       boot.binfmt.emulatedSystems = [ "x86_64-linux" ];
+
+      # nix.work-cache.net is on Tailscale (CNAME -> *.ts.net -> 100.x
+      # CGNAT). Apple Virtualization NAT masquerades VM egress through the
+      # host's primary interface, not utun, and Tailscale's WireGuard drops
+      # packets whose source isn't a tailnet IP. The only working path is
+      # to run tailscaled inside the VM itself.
+      #
+      # ephemeral=true wipes /var on every build, so the daemon must
+      # re-auth each boot via a reusable+ephemeral pre-auth key. The key is
+      # held in ./secrets.yaml encrypted with age, decrypted by sops-nix at
+      # VM activation, and materialised at /run/secrets/tailscale-authkey
+      # (root:0400). Generate the source key at
+      # https://login.tailscale.com/admin/settings/keys (reusable,
+      # ephemeral, pre-approved, tagged e.g. tag:builder).
+      services.tailscale = {
+        enable        = true;
+        authKeyFile   = config.sops.secrets.tailscale-authkey.path;
+        extraUpFlags  = [ "--ssh=false" "--accept-dns=true" ];
+      };
+      # sops-nix on this version (Mic92/sops-nix in the determinate
+      # nixosVmBasedLinuxBuilder context) decrypts via an activation
+      # script, NOT a systemd unit. /run/secrets is therefore populated
+      # by the time multi-user.target services start, so no explicit
+      # systemd After= ordering is required for tailscaled-autoconnect.
+      # A previous Requires=sops-install-secrets.service blocked the
+      # autoconnect unit (systemd treated the missing service as a failed
+      # dependency); we deliberately leave the override unset.
+
+      # sops-nix wiring for the VM. The age private key is sourced from
+      # the host at eval time (path NOT in this repo) and copied into the
+      # VM image via /nix/store. /nix/store is world-readable in the VM,
+      # but the VM only has root + builder users; the encrypted-in-git
+      # property is what we're protecting. Rotate the age key if leaked.
+      sops = {
+        defaultSopsFile = ../secrets.yaml;
+        # Point sops-install-secrets directly at the /etc symlink populated
+        # by environment.etc below. Avoids racing systemd-tmpfiles, which
+        # runs after the activation phase where sops-nix wants the key.
+        # The symlink target lives in /nix/store (world-readable inside the
+        # VM, but the VM only has builder + it-admin users); rotate the
+        # age key if leaked.
+        age.keyFile = "/etc/sops-nix-age-key";
+        secrets.tailscale-authkey = {
+          owner = "root";
+          mode  = "0400";
+        };
+        # mkpasswd -m sha-512 output for the it-admin user. Landed in
+        # /run/secrets/ alongside other regular secrets; NixOS reads
+        # users.<n>.hashedPasswordFile at activation time, which runs
+        # AFTER sops has decrypted, so no neededForUsers gymnastics are
+        # required. (neededForUsers needs the age key accessible from a
+        # very-early activation hook before /etc is populated, which
+        # would require staging the key in the initrd via
+        # boot.initrd.secrets — overkill for this use case.)
+        secrets.it-admin-password-hash = {
+          owner = "root";
+          mode  = "0400";
+        };
+      };
+      # Source path is outside the flake, so darwin-rebuild must run with
+      # --impure (see scripts/bootstrap-sops-builder.sh). Keeping the key
+      # in the standard sops location avoids tracking secret material in
+      # the dotfiles repo at all, even gitignored. The file is read at
+      # eval time and pinned into /nix/store as a content-addressed copy.
+      environment.etc."sops-nix-age-key" = {
+        source = /Users/lockbox/.config/sops/age/keys.txt;
+        mode   = "0400";
+      };
+
+      # Diagnostic/admin user for poking at tailscaled, sops, journal,
+      # etc. inside the VM. `builder` stays unprivileged (it is the
+      # nix-daemon's worker identity); only `it-admin` is in `wheel` and
+      # only `it-admin` can sudo. Auth is SSH-key based (reuses the host's
+      # builder_ed25519 public key so no extra key management) with a
+      # hashed password from sops kept for console / recovery access.
+      users.users.it-admin = {
+        isNormalUser = true;
+        description  = "Privileged admin (sudo + console) for the linux-builder VM";
+        extraGroups  = [ "wheel" ];
+        # The host's builder_ed25519.pub is the same key nix-daemon uses
+        # to SSH in as `builder`; reauthorizing it for `it-admin` means a
+        # plain `ssh it-admin@...` from the host works without any new key.
+        openssh.authorizedKeys.keyFiles = [
+          /etc/nix/builder_ed25519.pub
+        ];
+        hashedPasswordFile = config.sops.secrets.it-admin-password-hash.path;
+      };
+      # Wheel can sudo without a password; the it-admin password is for
+      # interactive console / recovery only, not routine sudo gating.
+      security.sudo.wheelNeedsPassword = false;
+
+      # MagicDNS resolves nix.work-cache.net once tailscaled is up.
+      # Belt-and-suspenders host entry for the brief window before login.
+      networking.extraHosts = ''
+        100.64.0.1 nix.work-cache.net
+      '';
 
       nix.settings.extra-substituters = [
         "https://nix-community.cachix.org"
-        "https://nix.work-cache.net"
+        "https://nix.work-cache.net/nix-cache"
       ];
       nix.settings.extra-trusted-public-keys = [
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -63,7 +161,7 @@
   # x86_64-linux closure that touches the rust toolchain.
   determinateNix.customSettings.extra-substituters = [
     "https://nix-community.cachix.org"
-    "https://nix.work-cache.net"
+    "https://nix.work-cache.net/nix-cache"
   ];
   determinateNix.customSettings.extra-trusted-public-keys = [
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
