@@ -9,6 +9,9 @@
     yubikey-manager
     restic
     rclone
+    sops
+    age
+    ssh-to-age
 
     # Version control
     git

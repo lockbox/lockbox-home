@@ -20,9 +20,17 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # sops-nix: secrets encrypted at rest in this repo, decrypted at
+    # activation time. Used to ship the Tailscale auth key into the
+    # ephemeral linux-builder VM without committing plaintext.
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, determinate, emacs-overlay }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, determinate, emacs-overlay, sops-nix }:
   {
     darwinConfigurations."pane" = nix-darwin.lib.darwinSystem {
       modules = [
