@@ -4,5 +4,13 @@ set -euo pipefail
 FLAKE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 echo ":: Rebuilding nix-darwin from ${FLAKE_DIR}..."
-sudo darwin-rebuild switch --flake "${FLAKE_DIR}"
+# --impure: host sops module references the age key by absolute path
+# (/Users/lockbox/.config/sops/age/keys.txt), which lives outside the
+# flake. Nix needs --impure to import it. Limited blast radius: every
+# other input is pinned via flake.lock.
+sudo darwin-rebuild switch --impure --flake "${FLAKE_DIR}"
+
+echo ":: Restarting linux-builder VM to pick up any config changes..."
+sudo launchctl kickstart -k system/org.nixos.nixos-vm-based-linux-builder
+
 echo ":: Done."
