@@ -1,9 +1,61 @@
-{ pkgs, inputs, lib, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 {
   networking.hostName = "pane";
   nixpkgs.hostPlatform = "aarch64-darwin";
   system.stateVersion = 6;
+
+  # Host-side sops-nix. Reuses the same age key the VM uses
+  # (/Users/lockbox/.config/sops/age/keys.txt), set up by
+  # scripts/bootstrap-sops-builder.sh. Decrypts the nix-serve signing
+  # key at darwin activation; darwin-rebuild must run with --impure
+  # because the age key path is outside the flake.
+  sops = {
+    defaultSopsFile = ../secrets.yaml;
+    age.keyFile     = "/Users/lockbox/.config/sops/age/keys.txt";
+    secrets."nix-serve-priv-key" = {
+      owner = "root";
+      mode  = "0400";
+    };
+  };
+
+  # Binary cache serving the host /nix/store to the linux-builder VM.
+  # Binds to the Apple Virtualization bridge gateway so only the VM can
+  # reach it (not Wi-Fi / loopback / external interfaces). Independent
+  # of nix-daemon -- works alongside Determinate's `nix.enable = false`
+  # because it only reads /nix/store over HTTP.
+  #
+  # 192.168.64.1 is the empirical default gateway IP of bridge100 on
+  # current macOS Virtualization framework. Verify with
+  # `ifconfig bridge100` after rebuild; update here if it shifts.
+  #
+  # nix-darwin does not have a services.nix-serve module (that is NixOS
+  # only); we wire the daemon via launchd instead. NIX_REMOTE=daemon
+  # tells nix-serve to talk to the nix-daemon socket rather than
+  # accessing /nix/store directly (required when the daemon owns the
+  # store). NIX_SECRET_KEY_FILE is read by nix-serve at startup to sign
+  # narinfo responses with the host's private key.
+  launchd.daemons.nix-serve = {
+    serviceConfig = {
+      Label            = "org.nixos.nix-serve";
+      # nix-serve-ng is a maintained Rust rewrite of nix-serve with the
+      # same CLI flags and a drop-in binary named `nix-serve`. The
+      # original nix-serve package is marked broken in nixpkgs.
+      ProgramArguments = [
+        "${pkgs.nix-serve-ng}/bin/nix-serve"
+        "--listen"
+        "192.168.64.1:5000"
+      ];
+      EnvironmentVariables = {
+        NIX_REMOTE          = "daemon";
+        NIX_SECRET_KEY_FILE = config.sops.secrets."nix-serve-priv-key".path;
+      };
+      RunAtLoad        = true;
+      KeepAlive        = true;
+      StandardOutPath  = "/var/log/nix-serve.log";
+      StandardErrorPath = "/var/log/nix-serve.log";
+    };
+  };
 
   # Linux remote builder VM for cross-arch Nix builds (e.g. building
   # packages.x86_64-linux.* outputs from this aarch64-darwin host).
@@ -128,11 +180,20 @@
         100.64.0.1 nix.work-cache.net
       '';
 
-      nix.settings.extra-substituters = [
+      # Substituter priority is list order: first entry tried first.
+      # Host nix-serve sits at position 0 so the VM hits the host's
+      # /nix/store before falling through to remote caches. mkForce
+      # neutralises the NixOS default that would otherwise inject
+      # cache.nixos.org at the head of the list.
+      nix.settings.substituters = lib.mkForce [
+        "http://192.168.64.1:5000"
+        "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
         "https://nix.work-cache.net/nix-cache"
       ];
-      nix.settings.extra-trusted-public-keys = [
+      nix.settings.trusted-public-keys = lib.mkForce [
+        "this-host-nix-serve-1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "work-cache-1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
       ];
