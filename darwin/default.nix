@@ -13,6 +13,12 @@
   sops = {
     defaultSopsFile = ../secrets.yaml;
     age.keyFile     = "/Users/lockbox/.config/sops/age/keys.txt";
+    # macOS has no /etc/ssh/ssh_host_{rsa,ed25519}_key by default;
+    # sops-install-secrets noisily warns about each missing path during
+    # activation. We use age exclusively here, so disable both SSH-key
+    # fallbacks to silence the warnings.
+    age.sshKeyPaths   = [];
+    gnupg.sshKeyPaths = [];
     secrets."nix-serve-priv-key" = {
       owner = "root";
       mode  = "0400";
