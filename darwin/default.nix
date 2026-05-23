@@ -20,14 +20,16 @@
   };
 
   # Binary cache serving the host /nix/store to the linux-builder VM.
-  # Binds to the Apple Virtualization bridge gateway so only the VM can
-  # reach it (not Wi-Fi / loopback / external interfaces). Independent
-  # of nix-daemon -- works alongside Determinate's `nix.enable = false`
-  # because it only reads /nix/store over HTTP.
+  # Independent of nix-daemon -- works alongside Determinate's
+  # `nix.enable = false` because it only reads /nix/store over HTTP.
   #
-  # 192.168.64.1 is the empirical default gateway IP of bridge100 on
-  # current macOS Virtualization framework. Verify with
-  # `ifconfig bridge100` after rebuild; update here if it shifts.
+  # Determinate's nixosVmBasedLinuxBuilder runs the VM under qemu user-mode
+  # networking (SLIRP), NOT a bridged interface. The VM lives on the
+  # 10.0.2.0/24 SLIRP subnet and reaches the host's loopback through the
+  # SLIRP gateway at 10.0.2.2 -- there is no bridge100 / 192.168.x.
+  # Therefore: bind nix-serve to 127.0.0.1 on the host, and the VM hits
+  # it as http://10.0.2.2:5000. Loopback binding also keeps the cache
+  # off Wi-Fi / Ethernet / utun interfaces with no firewall work.
   #
   # nix-darwin does not have a services.nix-serve module (that is NixOS
   # only); we wire the daemon via launchd instead. NIX_REMOTE=daemon
@@ -44,7 +46,7 @@
       ProgramArguments = [
         "${pkgs.nix-serve-ng}/bin/nix-serve"
         "--listen"
-        "192.168.64.1:5000"
+        "127.0.0.1:5000"
       ];
       EnvironmentVariables = {
         NIX_REMOTE          = "daemon";
@@ -185,8 +187,12 @@
       # /nix/store before falling through to remote caches. mkForce
       # neutralises the NixOS default that would otherwise inject
       # cache.nixos.org at the head of the list.
+      #
+      # 10.0.2.2 is the qemu SLIRP gateway: it transparently forwards
+      # VM traffic to the host's loopback, where nix-serve listens on
+      # 127.0.0.1:5000. No bridge IP, no firewall holes.
       nix.settings.substituters = lib.mkForce [
-        "http://192.168.64.1:5000"
+        "http://10.0.2.2:5000"
         "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
         "https://nix.work-cache.net/nix-cache"
