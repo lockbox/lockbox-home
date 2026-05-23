@@ -36,6 +36,7 @@
       modules = [
         determinate.darwinModules.default
         home-manager.darwinModules.home-manager
+        sops-nix.darwinModules.sops
         ./darwin
       ];
       specialArgs = { inherit inputs; };
