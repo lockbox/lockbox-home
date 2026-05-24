@@ -1,0 +1,28 @@
+# darwin/local.nix.example
+#
+# Per-host configuration. Copy to darwin/local.nix and fill in values for
+# your environment. darwin/local.nix is gitignored and MUST exist before
+# darwin-rebuild will evaluate this flake.
+{
+  # Remote (org) binary cache reached over Tailscale.
+  # The MagicDNS hostname for the cache, its tailnet IP, the substituter
+  # URL, and the cache's signing public key. Obtain cachePubKey from the
+  # cache operator.
+  cacheHost     = "nix.example.net";
+  cacheIP       = "100.64.0.1";
+  cacheURL      = "https://nix.example.net/nix-cache";
+  cachePubKey   = "example-cache-1:REPLACE_WITH_REAL_PUBKEY";
+
+  # This host's nix-serve identity. localKeyName is consumed by
+  # scripts/bootstrap-nix-serve-key.sh when generating the keypair.
+  # After running that script, paste the printed public key into
+  # localPubKey here.
+  localKeyName  = "this-host-nix-serve-1";
+  localPubKey   = "this-host-nix-serve-1:REPLACE_AFTER_BOOTSTRAP";
+
+  # Absolute path to the cloned secrets repo on this host (Nix path
+  # literal, NOT a string). The directory holds .sops.yaml and
+  # secrets.yaml, tracked in
+  # ssh://git@git.struct.foo:2222/lockbox/secrets.git
+  secretsDir    = /Users/REPLACE_USERNAME/.config/lockbox-secrets;
+}

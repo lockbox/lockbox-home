@@ -1,5 +1,8 @@
 { config, pkgs, inputs, lib, ... }:
 
+let
+  local = import ./local.nix;
+in
 {
   networking.hostName = "pane";
   nixpkgs.hostPlatform = "aarch64-darwin";
@@ -11,7 +14,7 @@
   # key at darwin activation; darwin-rebuild must run with --impure
   # because the age key path is outside the flake.
   sops = {
-    defaultSopsFile = ../secrets.yaml;
+    defaultSopsFile = local.secretsDir + "/secrets.yaml";
     age.keyFile     = "/Users/lockbox/.config/sops/age/keys.txt";
     # macOS has no /etc/ssh/ssh_host_{rsa,ed25519}_key by default;
     # sops-install-secrets noisily warns about each missing path during
@@ -92,7 +95,7 @@
 
       boot.binfmt.emulatedSystems = [ "x86_64-linux" ];
 
-      # nix.work-cache.net is on Tailscale (CNAME -> *.ts.net -> 100.x
+      # ${local.cacheHost} is on Tailscale (CNAME -> *.ts.net -> 100.x
       # CGNAT). Apple Virtualization NAT masquerades VM egress through the
       # host's primary interface, not utun, and Tailscale's WireGuard drops
       # packets whose source isn't a tailnet IP. The only working path is
@@ -125,7 +128,7 @@
       # but the VM only has root + builder users; the encrypted-in-git
       # property is what we're protecting. Rotate the age key if leaked.
       sops = {
-        defaultSopsFile = ../secrets.yaml;
+        defaultSopsFile = local.secretsDir + "/secrets.yaml";
         # Point sops-install-secrets directly at the /etc symlink populated
         # by environment.etc below. Avoids racing systemd-tmpfiles, which
         # runs after the activation phase where sops-nix wants the key.
@@ -182,10 +185,10 @@
       # interactive console / recovery only, not routine sudo gating.
       security.sudo.wheelNeedsPassword = false;
 
-      # MagicDNS resolves nix.work-cache.net once tailscaled is up.
+      # MagicDNS resolves ${local.cacheHost} once tailscaled is up.
       # Belt-and-suspenders host entry for the brief window before login.
       networking.extraHosts = ''
-        100.64.0.1 nix.work-cache.net
+        ${local.cacheIP} ${local.cacheHost}
       '';
 
       # Substituter priority is list order: first entry tried first.
@@ -201,13 +204,13 @@
         "http://10.0.2.2:5000"
         "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
-        "https://nix.work-cache.net/nix-cache"
+        local.cacheURL
       ];
       nix.settings.trusted-public-keys = lib.mkForce [
-        "this-host-nix-serve-1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+        local.localPubKey
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "work-cache-1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        local.cachePubKey
       ];
 
       # Default VM is 3 GB / 1 vCPU. Linking large Rust binaries with LTO
@@ -234,11 +237,11 @@
   # x86_64-linux closure that touches the rust toolchain.
   determinateNix.customSettings.extra-substituters = [
     "https://nix-community.cachix.org"
-    "https://nix.work-cache.net/nix-cache"
+    local.cacheURL
   ];
   determinateNix.customSettings.extra-trusted-public-keys = [
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    "work-cache-1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+    local.cachePubKey
   ];
 
   # Apply emacs-overlay for bleeding-edge emacs
