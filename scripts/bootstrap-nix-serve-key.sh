@@ -14,9 +14,24 @@
 set -euo pipefail
 
 REPO="${HOME}/.config/lockbox-home"
-SECRETS_FILE="${REPO}/secrets.yaml"
-SOPS_POLICY="${REPO}/.sops.yaml"
-KEY_NAME="this-host-nix-serve-1"
+LOCAL_NIX="${REPO}/darwin/local.nix"
+[[ -f "$LOCAL_NIX" ]] || { echo "[error] ${LOCAL_NIX} not found" >&2; exit 1; }
+
+read_local() {
+  nix eval --impure --raw --expr "(import ${LOCAL_NIX}).$1" 2>/dev/null
+}
+
+SECRETS_DIR="$(read_local secretsDir)"
+[[ -n "$SECRETS_DIR" && -d "$SECRETS_DIR" ]] \
+  || { echo "[error] secretsDir from ${LOCAL_NIX} not a directory: ${SECRETS_DIR:-<empty>}" >&2; exit 1; }
+[[ -d "${SECRETS_DIR}/.git" ]] \
+  || { echo "[error] ${SECRETS_DIR} is not a git repository" >&2; exit 1; }
+
+KEY_NAME="$(read_local localKeyName)"
+[[ -n "$KEY_NAME" ]] || { echo "[error] localKeyName in ${LOCAL_NIX} is empty" >&2; exit 1; }
+
+SECRETS_FILE="${SECRETS_DIR}/secrets.yaml"
+SOPS_POLICY="${SECRETS_DIR}/.sops.yaml"
 FIELD="nix-serve-priv-key"
 
 FORCE=0
@@ -73,8 +88,17 @@ PRIV_JSON="$(printf '%s' "$PRIV_CONTENT" | python3 -c 'import json,sys; print(js
 "${NIX_RUN[@]}" sops --config "$SOPS_POLICY" --set \
     "[\"${FIELD}\"] ${PRIV_JSON}" "$SECRETS_FILE"
 
-# Stage so Nix can see the change in the in-memory git snapshot.
-( cd "$REPO" && git add secrets.yaml )
+# Commit the updated encrypted secrets.yaml inside the secrets repo.
+(
+  cd "$SECRETS_DIR"
+  git add secrets.yaml
+  if ! git diff --cached --quiet; then
+    git commit -m "secrets: update nix-serve-priv-key on $(hostname -s)"
+    log "  changes committed; run 'git -C ${SECRETS_DIR} push' when ready to share"
+  else
+    log "  no changes to commit in secrets repo"
+  fi
+)
 
 log "public key (paste into darwin/default.nix):"
 echo

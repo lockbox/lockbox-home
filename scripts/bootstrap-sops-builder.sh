@@ -22,17 +22,28 @@
 set -euo pipefail
 
 REPO="${HOME}/.config/lockbox-home"
-# Age key lives at the standard sops CLI lookup path, OUTSIDE the dotfiles
-# repo. darwin-rebuild runs with --impure so Nix can import the absolute
-# path into /nix/store. Trade-off: the rebuild for this host is impure,
-# but no secret material (encrypted or otherwise) sits in the repo.
+LOCAL_NIX="${REPO}/darwin/local.nix"
+[[ -f "$LOCAL_NIX" ]] || { echo "[error] ${LOCAL_NIX} not found; copy darwin/local.nix.example and fill it in before running this script" >&2; exit 1; }
+
+read_local() {
+  nix eval --impure --raw --expr "(import ${LOCAL_NIX}).$1" 2>/dev/null
+}
+
+SECRETS_DIR="$(read_local secretsDir)"
+[[ -n "$SECRETS_DIR" && -d "$SECRETS_DIR" ]] \
+  || { echo "[error] secretsDir from ${LOCAL_NIX} not a directory: ${SECRETS_DIR:-<empty>}" >&2; exit 1; }
+[[ -d "${SECRETS_DIR}/.git" ]] \
+  || { echo "[error] ${SECRETS_DIR} is not a git repository; clone ssh://git@git.struct.foo:2222/lockbox/secrets.git there first" >&2; exit 1; }
+
+CACHE_HOST="$(read_local cacheHost)"
+[[ -n "$CACHE_HOST" ]] || { echo "[error] cacheHost in ${LOCAL_NIX} is empty" >&2; exit 1; }
+
 AGE_DIR="${HOME}/.config/sops/age"
 AGE_KEY="${AGE_DIR}/keys.txt"
-SOPS_POLICY="${REPO}/.sops.yaml"
-SECRETS_FILE="${REPO}/secrets.yaml"
+SOPS_POLICY="${SECRETS_DIR}/.sops.yaml"
+SECRETS_FILE="${SECRETS_DIR}/secrets.yaml"
 HOSTNAME_DARWIN="pane"
 VM_SERVICE="system/org.nixos.nixos-vm-based-linux-builder"
-CACHE_HOST="nix.work-cache.net"
 CACHE_PROBE_PATH="/nix-cache/nix-cache-info"
 
 FORCE=0
@@ -204,8 +215,17 @@ fi
 # policy so they're visible in the in-memory git snapshot Nix builds.
 # Both files are safe to commit: secrets.yaml is age-encrypted, .sops.yaml
 # only contains the public recipient.
-log "  staging $SOPS_POLICY and $SECRETS_FILE so Nix can see them"
-( cd "$REPO" && git add .sops.yaml secrets.yaml )
+log "  committing ${SOPS_POLICY} and ${SECRETS_FILE} inside the secrets repo"
+(
+  cd "$SECRETS_DIR"
+  git add .sops.yaml secrets.yaml
+  if ! git diff --cached --quiet; then
+    git commit -m "secrets: bootstrap update from $(hostname -s)"
+    log "  changes committed; run 'git -C ${SECRETS_DIR} push' when ready to share"
+  else
+    log "  no changes to commit in secrets repo"
+  fi
+)
 
 log "step 4/6: update flake lock for sops-nix"
 # `nix flake update <input>` is the non-deprecated form for refreshing a
