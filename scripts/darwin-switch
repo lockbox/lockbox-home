@@ -10,6 +10,14 @@ fi
 TARGET="$1"
 FLAKE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
+# Determinate's flake evaluation reads inputs from an in-memory git
+# snapshot of the working tree. Gitignored files (darwin/local.nix here)
+# are excluded from that snapshot, so `import ./local.nix` fails unless
+# we force-stage it for the duration of the rebuild. The trap restores
+# the index even if darwin-rebuild errors out.
+trap 'git -C "${FLAKE_DIR}" restore --staged darwin/local.nix 2>/dev/null || true' EXIT
+git -C "${FLAKE_DIR}" add -f darwin/local.nix
+
 echo ":: Rebuilding nix-darwin from ${FLAKE_DIR}#${TARGET}..."
 # --impure: host sops module references the age key by absolute path
 # (/Users/lockbox/.config/sops/age/keys.txt), which lives outside the
