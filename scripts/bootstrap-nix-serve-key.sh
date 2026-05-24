@@ -21,7 +21,14 @@ read_local() {
   nix eval --impure --raw --expr "(import ${LOCAL_NIX}).$1" 2>/dev/null
 }
 
-SECRETS_DIR="$(read_local secretsDir)"
+# secretsDir is a Nix path literal; toString returns its original filesystem
+# path without triggering the path-to-store-copy coercion that --raw applies
+# to bare path values.
+read_local_path() {
+  nix eval --impure --raw --expr "toString (import ${LOCAL_NIX}).$1" 2>/dev/null
+}
+
+SECRETS_DIR="$(read_local_path secretsDir)"
 [[ -n "$SECRETS_DIR" && -d "$SECRETS_DIR" ]] \
   || { echo "[error] secretsDir from ${LOCAL_NIX} not a directory: ${SECRETS_DIR:-<empty>}" >&2; exit 1; }
 [[ -d "${SECRETS_DIR}/.git" ]] \
