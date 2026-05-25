@@ -25,4 +25,13 @@
   # secrets.yaml, tracked in
   # ssh://git@git.struct.foo:2222/lockbox/secrets.git
   secretsDir    = /Users/REPLACE_USERNAME/.config/lockbox-secrets;
+
+  # Names of this host's entries inside the shared secrets.yaml. Per-host
+  # suffix prevents collisions when multiple darwin hosts share one
+  # sops-encrypted file (e.g. -pane / -foo-mac-mini). The bootstrap
+  # scripts read these names from local.nix when encrypting; default.nix
+  # reads them when wiring config.sops.secrets paths.
+  localKeySecret                = "nix-serve-priv-key-REPLACE_HOST";
+  tailscaleAuthkeySecret        = "tailscale-authkey-REPLACE_HOST";
+  itAdminPasswordHashSecret     = "it-admin-password-hash-REPLACE_HOST";
 }

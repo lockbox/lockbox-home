@@ -37,9 +37,14 @@ SECRETS_DIR="$(read_local_path secretsDir)"
 KEY_NAME="$(read_local localKeyName)"
 [[ -n "$KEY_NAME" ]] || { echo "[error] localKeyName in ${LOCAL_NIX} is empty" >&2; exit 1; }
 
+# Per-host suffix for the encrypted private-key entry (e.g.
+# nix-serve-priv-key-pane). Read from local.nix so each host's bootstrap
+# writes to its own field inside the shared secrets.yaml.
+FIELD="$(read_local localKeySecret)"
+[[ -n "$FIELD" ]] || { echo "[error] localKeySecret in ${LOCAL_NIX} is empty" >&2; exit 1; }
+
 SECRETS_FILE="${SECRETS_DIR}/secrets.yaml"
 SOPS_POLICY="${SECRETS_DIR}/.sops.yaml"
-FIELD="nix-serve-priv-key"
 
 FORCE=0
 for arg in "$@"; do
