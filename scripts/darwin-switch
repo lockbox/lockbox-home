@@ -23,9 +23,26 @@ echo ":: Rebuilding nix-darwin from ${FLAKE_DIR}#${TARGET}..."
 # (/Users/lockbox/.config/sops/age/keys.txt), which lives outside the
 # flake. Nix needs --impure to import it. Limited blast radius: every
 # other input is pinned via flake.lock.
-sudo darwin-rebuild switch --impure --flake "${FLAKE_DIR}#${TARGET}"
+#
+# First-install bootstrap: on a fresh mac the `darwin-rebuild` binary
+# isn't on PATH yet; nix-darwin only installs it after the first
+# successful activation. Fall back to `nix run nix-darwin -- switch`,
+# which fetches the rebuild tool from the flake registry on demand.
+if command -v darwin-rebuild >/dev/null; then
+  sudo darwin-rebuild switch --impure --flake "${FLAKE_DIR}#${TARGET}"
+else
+  echo "   (first-install bootstrap: darwin-rebuild not yet on PATH, using nix run)"
+  sudo nix run nix-darwin -- switch --impure --flake "${FLAKE_DIR}#${TARGET}"
+fi
 
-echo ":: Restarting linux-builder VM to pick up any config changes..."
-sudo launchctl kickstart -k system/org.nixos.nixos-vm-based-linux-builder
+# Only kick the linux-builder VM if launchd actually loaded it. Hosts
+# without the builder service (or first-install runs before activation
+# finished) skip this without erroring.
+if sudo launchctl print system/org.nixos.nixos-vm-based-linux-builder >/dev/null 2>&1; then
+  echo ":: Restarting linux-builder VM to pick up any config changes..."
+  sudo launchctl kickstart -k system/org.nixos.nixos-vm-based-linux-builder
+else
+  echo ":: linux-builder VM service not loaded (skipping kickstart)"
+fi
 
 echo ":: Done."
