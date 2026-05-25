@@ -4,8 +4,9 @@ let
   local = import ./local.nix;
 in
 {
-  networking.hostName = "pane";
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  # networking.hostName and nixpkgs.hostPlatform are set by the per-host
+  # module under ./hosts/<host>.nix, wired in from flake.nix. Keeping them
+  # out of this shared module lets multiple darwinConfigurations reuse it.
   system.stateVersion = 6;
 
   # Host-side sops-nix. Reuses the same age key the VM uses
@@ -22,7 +23,7 @@ in
     # fallbacks to silence the warnings.
     age.sshKeyPaths   = [];
     gnupg.sshKeyPaths = [];
-    secrets."nix-serve-priv-key" = {
+    secrets.${local.localKeySecret} = {
       owner = "root";
       mode  = "0400";
     };
@@ -59,7 +60,7 @@ in
       ];
       EnvironmentVariables = {
         NIX_REMOTE          = "daemon";
-        NIX_SECRET_KEY_FILE = config.sops.secrets."nix-serve-priv-key".path;
+        NIX_SECRET_KEY_FILE = config.sops.secrets.${local.localKeySecret}.path;
       };
       RunAtLoad        = true;
       KeepAlive        = true;
@@ -110,7 +111,7 @@ in
       # ephemeral, pre-approved, tagged e.g. tag:builder).
       services.tailscale = {
         enable        = true;
-        authKeyFile   = config.sops.secrets.tailscale-authkey.path;
+        authKeyFile   = config.sops.secrets.${local.tailscaleAuthkeySecret}.path;
         extraUpFlags  = [ "--ssh=false" "--accept-dns=true" ];
       };
       # sops-nix on this version (Mic92/sops-nix in the determinate
@@ -136,7 +137,7 @@ in
         # VM, but the VM only has builder + it-admin users); rotate the
         # age key if leaked.
         age.keyFile = "/etc/sops-nix-age-key";
-        secrets.tailscale-authkey = {
+        secrets.${local.tailscaleAuthkeySecret} = {
           owner = "root";
           mode  = "0400";
         };
@@ -148,7 +149,7 @@ in
         # very-early activation hook before /etc is populated, which
         # would require staging the key in the initrd via
         # boot.initrd.secrets — overkill for this use case.)
-        secrets.it-admin-password-hash = {
+        secrets.${local.itAdminPasswordHashSecret} = {
           owner = "root";
           mode  = "0400";
         };
@@ -179,7 +180,7 @@ in
         openssh.authorizedKeys.keyFiles = [
           /etc/nix/builder_ed25519.pub
         ];
-        hashedPasswordFile = config.sops.secrets.it-admin-password-hash.path;
+        hashedPasswordFile = config.sops.secrets.${local.itAdminPasswordHashSecret}.path;
       };
       # Wheel can sudo without a password; the it-admin password is for
       # interactive console / recovery only, not routine sudo gating.

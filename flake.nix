@@ -31,15 +31,23 @@
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, determinate, emacs-overlay, sops-nix }:
-  {
-    darwinConfigurations."pane" = nix-darwin.lib.darwinSystem {
+  let
+    # Shared module list. Per-host wrapper modules under ./darwin/hosts set
+    # networking.hostName + nixpkgs.hostPlatform; everything else lives in
+    # ./darwin and is reused across hosts.
+    mkHost = hostModule: nix-darwin.lib.darwinSystem {
       modules = [
         determinate.darwinModules.default
         home-manager.darwinModules.home-manager
         sops-nix.darwinModules.sops
+        hostModule
         ./darwin
       ];
       specialArgs = { inherit inputs; };
     };
+  in
+  {
+    darwinConfigurations."pane"          = mkHost ./darwin/hosts/pane.nix;
+    darwinConfigurations."foo-mac-mini"  = mkHost ./darwin/hosts/foo-mac-mini.nix;
   };
 }
