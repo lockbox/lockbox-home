@@ -49,5 +49,20 @@
   {
     darwinConfigurations."pane"          = mkHost ./darwin/hosts/pane.nix;
     darwinConfigurations."foo-mac-mini"  = mkHost ./darwin/hosts/foo-mac-mini.nix;
+
+    # First-install bootstrap target for foo-mac-mini. Deliberately does
+    # NOT import ./darwin: that module imports local.nix and configures
+    # sops + custom VM + nix-serve, which require an aarch64-linux
+    # builder already running. The bootstrap stands up a vanilla
+    # Determinate builder VM so the subsequent `.#foo-mac-mini` switch
+    # has aarch64-linux available locally. See the module header for
+    # full rationale.
+    darwinConfigurations."foo-mac-mini-bootstrap" = nix-darwin.lib.darwinSystem {
+      modules = [
+        determinate.darwinModules.default
+        ./darwin/hosts/foo-mac-mini-bootstrap.nix
+      ];
+      specialArgs = { inherit inputs; };
+    };
   };
 }
