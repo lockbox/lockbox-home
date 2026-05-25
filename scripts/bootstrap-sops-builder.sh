@@ -142,7 +142,10 @@ else
   # and append (with our host marker) to keys.txt. Preserves any existing
   # blocks that belong to other hosts (e.g. pane's key copied here during
   # mac-mini onboarding).
-  TMP_KEY="$(mktemp "${TMPDIR:-/tmp}/age-keygen.XXXXXX")"
+  # age-keygen -o refuses to write to an existing file; mktemp creates
+  # the file by default, so we ask for a name only (-u) and rely on our
+  # own ownership of TMPDIR to avoid the race.
+  TMP_KEY="$(mktemp -u "${TMPDIR:-/tmp}/age-keygen.XXXXXX")"
   trap 'rm -f "$TMP_KEY"' EXIT
   "${NIX_RUN[@]}" age-keygen -o "$TMP_KEY"
   {
